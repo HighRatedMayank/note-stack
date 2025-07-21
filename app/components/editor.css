@@ -1,0 +1,25 @@
+.editor-container {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  min-height: 300px;
+  background-color: #fff;
+}
+
+.editor-input {
+  min-height: 200px;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  outline: none;
+}
+
+.editor-paragraph {
+  margin: 0;
+}
+
+.editor-placeholder {
+  color: #999;
+  position: absolute;
+  pointer-events: none;
+}

@@ -9,7 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@lexical/react": "^0.33.1",
+    "@lexical/rich-text": "^0.33.1",
     "firebase": "^12.0.0",
+    "lexical": "^0.33.1",
     "next": "15.4.1",
     "react": "19.1.0",
     "react-dom": "19.1.0"
