@@ -11,6 +11,7 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { EditorState, LexicalEditor } from "lexical";
 import { ListNode, ListItemNode } from "@lexical/list";
 import { HeadingNode } from "@lexical/rich-text";
+import SaveLoadPlugin from "./SaveLoadPlugin";
 
 import ToolbarPlugin from "./ToolbarPlugin";
 import "./editor.css"; // Custom styles
@@ -60,6 +61,7 @@ export default function LexicalEditorComponent({
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className="editor-wrapper border rounded p-2">
+        <SaveLoadPlugin />
         <ToolbarPlugin />
         <RichTextPlugin
           contentEditable={

@@ -8,10 +8,12 @@
 
 .editor-input {
   min-height: 200px;
-  padding: 1rem;
+  padding: 8px;
   border: 1px solid #ccc;
   border-radius: 0.5rem;
   outline: none;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 .editor-paragraph {
@@ -19,7 +21,8 @@
 }
 
 .editor-placeholder {
-  color: #999;
   position: absolute;
   pointer-events: none;
+  padding: 8px;
+  color: #999;
 }
