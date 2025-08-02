@@ -1,54 +1,84 @@
-// components/SaveLoadPlugin.tsx
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { $createParagraphNode, $createTextNode } from "lexical";
+import {
+  $getRoot,
+  EditorState,
+} from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { db } from "../../lib/firebase"; 
+import { useParams } from "next/navigation";
+import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { useCallback } from "react";
+import { debounce } from "lodash";
+import { useAuth } from "../context/AuthContext";
 
 export default function SaveLoadPlugin() {
   const [editor] = useLexicalComposerContext();
+  const { user } = useAuth();
+  const { pageId } = useParams();
+  const [status, setStatus] = useState<"idle" | "saving" | "saved">("idle");
 
-  const saveContent = useCallback(async () => {
-    const editorState = editor.getEditorState();
-    const json = editorState.toJSON();
+  const saveContent = async (editorState: EditorState) => {
+    if (!user || !pageId) return;
 
-    const docRef = doc(db, "documents", "myDoc");
-    await setDoc(docRef, { content: json });
+    setStatus("saving");
 
-    alert("✅ Saved to Firestore");
-  }, [editor]);
-
-  const loadContent = useCallback(async () => {
-    const docRef = doc(db, "documents", "myDoc");
-    const snap = await getDoc(docRef);
-
-    if (snap.exists()) {
-      const json = snap.data()?.content;
-      editor.update(() => {
-        const state = editor.parseEditorState(json);
-        editor.setEditorState(state);
+    const htmlString = await new Promise<string>((resolve) => {
+      editorState.read(() => {
+        const root = $getRoot();
+        resolve(root.getTextContent()); 
       });
-      alert("📂 Loaded from Firestore");
-    } else {
-      alert("⚠️ No document found");
-    }
-  }, [editor]);
+    });
+
+    await setDoc(
+      doc(db, "users", user.uid, "documents", pageId as string),
+      { content: htmlString },
+      { merge: true }
+    );
+
+    setStatus("saved");
+    setTimeout(() => setStatus("idle"), 1500);
+  };
+
+  const debouncedSave = useRef(debounce(saveContent, 1000)).current;
+
+  useEffect(() => {
+    return editor.registerUpdateListener(({ editorState }) => {
+      debouncedSave(editorState);
+    });
+  }, [editor, debouncedSave]);
+
+  useEffect(() => {
+    const loadContent = async () => {
+      if (!user || !pageId) return;
+      const docRef = doc(db, "users", user.uid, "documents", pageId as string);
+      const snapshot = await getDoc(docRef);
+      const data = snapshot.data();
+
+      if (data?.content) {
+        editor.update(() => {
+          const root = $getRoot();
+          root.clear();
+          const paragraph = $createParagraphNode();
+          paragraph.append($createTextNode(data.content));
+          root.append(paragraph);
+        });
+      }
+    };
+
+    loadContent();
+  }, [editor, user, pageId]);
 
   return (
-    <div className="mb-4 flex gap-2">
-      <button
-        onClick={saveContent}
-        className="px-3 py-1 bg-blue-500 text-white rounded"
-      >
-        💾 Save
-      </button>
-      <button
-        onClick={loadContent}
-        className="px-3 py-1 bg-green-600 text-white rounded"
-      >
-        📂 Load
-      </button>
+    <div className="absolute top-4 right-6 z-50">
+      {status === "saving" && (
+        <div className="text-sm text-yellow-500 animate-pulse">Saving...</div>
+      )}
+      {status === "saved" && (
+        <div className="text-sm text-green-500">All changes saved</div>
+      )}
     </div>
-  );
+  )
 }
+

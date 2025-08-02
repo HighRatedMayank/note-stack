@@ -10,9 +10,9 @@ import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { EditorState, LexicalEditor } from "lexical";
 import { ListNode, ListItemNode } from "@lexical/list";
+import {CodeHighlightNode, CodeNode} from "@lexical/code"
 import { HeadingNode } from "@lexical/rich-text";
 import ToolbarPlugin from "./ToolbarPlugin";
-import "react-toastify/dist/ReactToastify.css";
 import "./editor.css";
 
 export default function LexicalEditorComponent({
@@ -54,21 +54,24 @@ export default function LexicalEditorComponent({
             }
           }
         : undefined,
-    nodes: [ListNode, ListItemNode, HeadingNode],
+    nodes: [ListNode, ListItemNode, HeadingNode, CodeNode, CodeHighlightNode],
   };
 
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className="border rounded-md p-4 bg-white shadow-sm">
         <ToolbarPlugin />
-        <RichTextPlugin
+        <div className="position-relative">
+          <RichTextPlugin
           contentEditable={
             <ContentEditable className="editor-input min-h-[300px] outline-none" />
           }
-          placeholder={
+          placeholder={ <div className="position-absolute top-8px left-10px fontSize-12px">
             <div className="editor-placeholder text-gray-400">
               Start typing...
             </div>
+          </div>
+            
           }
           ErrorBoundary={({ children }) => <>{children}</>}
         />
@@ -78,7 +81,11 @@ export default function LexicalEditorComponent({
             onChange(JSON.stringify(editorState.toJSON()));
           }}
         />
+        </div>
+          
       </div>
     </LexicalComposer>
+       
+        
   );
 }

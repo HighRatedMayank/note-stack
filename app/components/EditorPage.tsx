@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { getPageContent, updatePageContent } from "@/lib/firestore.pages";
 import { useAuth } from "@/app/context/AuthContext";
 
-const LexicalEditorComponent = dynamic(() => import("./LexicalEditor"), {
+const LexicalEditorComponent = dynamic(() => import("./LexicalEditorComponents"), {
   ssr: false,
 });
 

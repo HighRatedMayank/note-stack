@@ -7,10 +7,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <AuthProvider>
+          <Toaster position="bottom-right" />
           <div className="flex">
             <Sidebar />
         <main className="flex-1">
-          <Toaster position="bottom-right" />
           {children}
         </main>
           </div>
