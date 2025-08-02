@@ -11,10 +11,9 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { EditorState, LexicalEditor } from "lexical";
 import { ListNode, ListItemNode } from "@lexical/list";
 import { HeadingNode } from "@lexical/rich-text";
-import SaveLoadPlugin from "./SaveLoadPlugin";
-
 import ToolbarPlugin from "./ToolbarPlugin";
-import "./editor.css"; // Custom styles
+import "react-toastify/dist/ReactToastify.css";
+import "./editor.css";
 
 export default function LexicalEditorComponent({
   onChange,
@@ -60,12 +59,11 @@ export default function LexicalEditorComponent({
 
   return (
     <LexicalComposer initialConfig={editorConfig}>
-      <div className="editor-wrapper border rounded p-2">
-        <SaveLoadPlugin />
+      <div className="border rounded-md p-4 bg-white shadow-sm">
         <ToolbarPlugin />
         <RichTextPlugin
           contentEditable={
-            <ContentEditable className="editor-input min-h-[200px] outline-none" />
+            <ContentEditable className="editor-input min-h-[300px] outline-none" />
           }
           placeholder={
             <div className="editor-placeholder text-gray-400">

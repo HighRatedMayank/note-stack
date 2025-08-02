@@ -28,7 +28,19 @@ export const getPageContent = async (pageId: string) => {
   return "";
 }
 
-export const updatePageContent = async (pageId: string, content: string) => {
+export const updatePageContent = async (
+  pageId: string,
+  content: string,
+  title?: string
+) => {
   const docRef = doc(db, "pages", pageId);
-  await setDoc(docRef, { content, updatedAt: Timestamp.now() }, { merge: true });
-}
+  await setDoc(
+    docRef,
+    {
+      content,
+      updatedAt: Timestamp.now(),
+      ...(title && { title }),
+    },
+    { merge: true }
+  );
+};
