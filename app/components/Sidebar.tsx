@@ -32,6 +32,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useTheme } from "next-themes"
+import { Sun, Moon } from "lucide-react"
 
 interface PageNode {
   id: string;
@@ -54,6 +56,20 @@ export default function Sidebar() {
       activationConstraint: { distance: 5 },
     })
   );
+
+  function ThemeToggle() {
+  const { theme, setTheme } = useTheme()
+
+  return (
+    <button
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      className="mb-4 flex items-center space-x-2 px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-sm text-black dark:text-white hover:opacity-90"
+    >
+      {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+      <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+    </button>
+  )
+}
 
   useEffect(() => {
     if (!user) return;
@@ -171,6 +187,7 @@ export default function Sidebar() {
   return (
     <div className="w-64 bg-white dark:bg-gray-900 text-black dark:text-white h-screen p-4 border-r dark:border-gray-700 overflow-y-auto">
       <h2 className="text-lg font-bold mb-2">Your Pages</h2>
+      <ThemeToggle />
 
       {/* Search Bar */}
       <div className="flex items-center bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded mb-4">
