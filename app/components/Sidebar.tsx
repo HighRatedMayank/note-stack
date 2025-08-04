@@ -9,9 +9,6 @@ import {
   onSnapshot,
   setDoc,
   deleteDoc,
-  updateDoc,
-  query,
-  orderBy,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
@@ -19,18 +16,17 @@ import {
   Trash2,
   ChevronDown,
   ChevronRight,
-  GripVertical,
+  Search,
 } from "lucide-react";
 import {
   DndContext,
   closestCenter,
+  PointerSensor,
   useSensor,
   useSensors,
-  PointerSensor,
   DragEndEvent,
 } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
@@ -42,121 +38,43 @@ interface PageNode {
   title: string;
   parentId?: string | null;
   children?: PageNode[];
-  position?: number;
-}
-
-function SortableItem({
-  page,
-  pathname,
-  onClick,
-  onDelete,
-  onCreateChild,
-  collapsed,
-  toggleCollapse,
-}: {
-  page: PageNode;
-  pathname: string;
-  onClick: () => void;
-  onDelete: () => void;
-  onCreateChild: () => void;
-  collapsed: boolean;
-  toggleCollapse: () => void;
-}) {
-  const { setNodeRef, attributes, listeners, transform, transition } =
-    useSortable({ id: page.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} className="pl-2">
-      <div
-        className={`flex items-center justify-between pr-2 py-1 cursor-pointer hover:bg-gray-100 rounded ${
-          pathname.includes(page.id) ? "bg-blue-100 font-semibold" : ""
-        }`}
-      >
-        <div className="flex items-center space-x-1" onClick={onClick}>
-          {/* collapse button */}
-          {page.children && page.children.length > 0 && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleCollapse();
-              }}
-            >
-              {collapsed ? (
-                <ChevronRight size={16} />
-              ) : (
-                <ChevronDown size={16} />
-              )}
-            </button>
-          )}
-          {/* drag handle */}
-          <div {...attributes} {...listeners} className="cursor-move">
-            <GripVertical size={14} />
-          </div>
-          <span>{page.title}</span>
-        </div>
-        <div className="flex gap-1">
-          <button
-            className="text-green-600 hover:text-green-800"
-            onClick={(e) => {
-              e.stopPropagation();
-              onCreateChild();
-            }}
-          >
-            <Plus size={16} />
-          </button>
-          <button
-            className="text-red-600 hover:text-red-800"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export default function Sidebar() {
   const { user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+
   const [pages, setPages] = useState<PageNode[]>([]);
   const [collapsed, setCollapsed] = useState<{ [key: string]: boolean }>({});
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    })
+  );
 
   useEffect(() => {
     if (!user) return;
-    const q = query(
-      collection(db, "users", user.uid, "documents"),
-      orderBy("position", "asc")
-    );
+    const userPagesRef = collection(db, "users", user.uid, "documents");
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(userPagesRef, (snapshot) => {
       const pageMap: { [id: string]: PageNode } = {};
       const rootPages: PageNode[] = [];
 
-      snapshot.docs.forEach((docSnap, index) => {
+      snapshot.docs.forEach((docSnap) => {
         const data = docSnap.data();
         const page: PageNode = {
           id: docSnap.id,
           title: data.title || "Untitled",
           parentId: data.parentId || null,
-          position: data.position ?? index,
           children: [],
         };
         pageMap[docSnap.id] = page;
       });
 
-      snapshot.forEach((docSnap) => {
+      snapshot.docs.forEach((docSnap) => {
         const data = docSnap.data();
         const parentId = data.parentId;
         if (parentId && pageMap[parentId]) {
@@ -193,45 +111,82 @@ export default function Sidebar() {
     setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const filterPages = (pages: PageNode[]): PageNode[] => {
+    return pages
+      .filter((page) =>
+        page.title.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .map((page) => ({
+        ...page,
+        children: page.children ? filterPages(page.children) : [],
+      }));
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    if (!active || !over || active.id === over.id) return;
+    if (!user) return;
 
-    const oldIndex = pages.findIndex((p) => p.id === active.id);
-    const newIndex = pages.findIndex((p) => p.id === over.id);
-    const reordered = arrayMove(pages, oldIndex, newIndex);
-    setPages(reordered);
+    try {
+      const activeId = active.id.toString();
+      const overId = over.id.toString();
 
-    // Save new positions
-    for (let i = 0; i < reordered.length; i++) {
-      const ref = doc(db, "users", user!.uid, "documents", reordered[i].id);
-      await updateDoc(ref, { position: i });
+      // Update Firestore to move the active item under the "over" item
+      await setDoc(
+        doc(db, "users", user.uid, "documents", activeId),
+        { parentId: overId },
+        { merge: true }
+      );
+    } catch (err) {
+      console.error("Failed to update page hierarchy:", err);
     }
   };
 
-  const renderPages = (pages: PageNode[]) => {
-    return pages.map((page) => (
-      <SortableItem
-        key={page.id}
-        page={page}
-        pathname={pathname}
-        onClick={() => router.push(`/editor/${page.id}`)}
-        onDelete={() => handleDelete(page.id)}
-        onCreateChild={() => handleCreate(page.id)}
-        collapsed={collapsed[page.id]}
-        toggleCollapse={() => toggleCollapse(page.id)}
-      />
-    ));
+  const renderPages = (pages: PageNode[], depth = 0) => {
+    const ids = pages.map((page) => page.id);
+
+    return (
+      <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+        {pages.map((page) => (
+          <SidebarItem
+            key={page.id}
+            page={page}
+            depth={depth}
+            collapsed={collapsed}
+            toggleCollapse={toggleCollapse}
+            handleCreate={handleCreate}
+            handleDelete={handleDelete}
+            pathname={pathname}
+            router={router}
+          />
+        ))}
+      </SortableContext>
+    );
   };
+
+  const filteredPages = searchTerm ? filterPages(pages) : pages;
 
   if (!user) return null;
 
   return (
-    <div className="w-64 bg-white h-screen p-4 border-r overflow-y-auto">
-      <h2 className="text-lg font-bold mb-4">Your Pages</h2>
+    <div className="w-64 bg-white dark:bg-gray-900 text-black dark:text-white h-screen p-4 border-r dark:border-gray-700 overflow-y-auto">
+      <h2 className="text-lg font-bold mb-2">Your Pages</h2>
+
+      {/* Search Bar */}
+      <div className="flex items-center bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded mb-4">
+        <Search size={16} className="text-gray-500" />
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search..."
+          className="ml-2 bg-transparent outline-none w-full placeholder:text-sm"
+        />
+      </div>
+
       <button
         onClick={() => handleCreate()}
-        className="mb-4 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+        className="mb-4 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 w-full"
       >
         + New Page
       </button>
@@ -241,13 +196,115 @@ export default function Sidebar() {
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext
-          items={pages.map((p) => p.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          {renderPages(pages)}
-        </SortableContext>
+        <div>{renderPages(filteredPages)}</div>
       </DndContext>
+    </div>
+  );
+}
+
+function SidebarItem({
+  page,
+  depth,
+  collapsed,
+  toggleCollapse,
+  handleCreate,
+  handleDelete,
+  pathname,
+  router,
+}: {
+  page: PageNode;
+  depth: number;
+  collapsed: Record<string, boolean>;
+  toggleCollapse: (id: string) => void;
+  handleCreate: (parentId: string | null) => void;
+  handleDelete: (id: string) => void;
+  pathname: string;
+  router: ReturnType<typeof useRouter>;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: page.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    paddingLeft: `${depth * 16}px`,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <div
+        className={`flex items-center justify-between pr-2 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded ${
+          pathname.includes(page.id)
+            ? "bg-blue-100 dark:bg-blue-800 font-semibold"
+            : ""
+        }`}
+      >
+        <div
+          className="flex items-center space-x-1"
+          onClick={() => router.push(`/editor/${page.id}`)}
+        >
+          {page.children && page.children.length > 0 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleCollapse(page.id);
+              }}
+            >
+              {collapsed[page.id] ? (
+                <ChevronRight size={16} />
+              ) : (
+                <ChevronDown size={16} />
+              )}
+            </button>
+          )}
+          <span>{page.title}</span>
+        </div>
+        <div className="flex gap-1">
+          <button
+            className="text-green-600 hover:text-green-800"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCreate(page.id);
+            }}
+          >
+            <Plus size={16} />
+          </button>
+          <button
+            className="text-red-600 hover:text-red-800"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(page.id);
+            }}
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      </div>
+
+      {page.children && page.children.length > 0 && !collapsed[page.id] && (
+        <div className="ml-4 border-l border-gray-300 pl-2 dark:border-gray-700">
+          {page.children.map((child) => (
+            <SidebarItem
+              key={child.id}
+              page={child}
+              depth={depth + 1}
+              collapsed={collapsed}
+              toggleCollapse={toggleCollapse}
+              handleCreate={handleCreate}
+              handleDelete={handleDelete}
+              pathname={pathname}
+              router={router}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

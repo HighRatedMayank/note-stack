@@ -7,7 +7,6 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "../context/AuthContext";
 import SaveLoadPlugin from "./SaveLoadPlugin";
-import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
 
 const LexicalEditorComponent = dynamic(() => import("./LexicalEditorComponent"), {
@@ -59,10 +58,6 @@ export default function EditorPage() {
 
   return (
     <div>
-      <Toaster
-        position="top-center"
-        reverseOrder={false}
-      />
       <div className="relative flex flex-col gap-2 p-6 max-w-4xl mx-auto w-full">
       <input
         value={title}
