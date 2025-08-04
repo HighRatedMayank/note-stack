@@ -10,7 +10,7 @@ import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { EditorState, LexicalEditor } from "lexical";
 import { ListNode, ListItemNode } from "@lexical/list";
-import {CodeHighlightNode, CodeNode} from "@lexical/code"
+import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { HeadingNode } from "@lexical/rich-text";
 import ToolbarPlugin from "./ToolbarPlugin";
 import "./editor.css";
@@ -46,13 +46,13 @@ export default function LexicalEditorComponent({
     editorState:
       initialContent && typeof initialContent === "string"
         ? (editor: LexicalEditor) => {
-            try {
-              const parsed = editor.parseEditorState(initialContent);
-              editor.setEditorState(parsed);
-            } catch (err) {
-              console.warn("Failed to parse initialContent:", err);
-            }
+          try {
+            const parsed = editor.parseEditorState(initialContent);
+            editor.setEditorState(parsed);
+          } catch (err) {
+            console.warn("Failed to parse initialContent:", err);
           }
+        }
         : undefined,
     nodes: [ListNode, ListItemNode, HeadingNode, CodeNode, CodeHighlightNode],
   };
@@ -63,29 +63,28 @@ export default function LexicalEditorComponent({
         <ToolbarPlugin />
         <div className="position-relative">
           <RichTextPlugin
-          contentEditable={
-            <ContentEditable className="editor-input min-h-[300px] outline-none" />
-          }
-          placeholder={ <div className="position-absolute top-8px left-10px fontSize-12px">
-            <div className="editor-placeholder text-gray-400">
-              Start typing...
-            </div>
-          </div>
-            
-          }
-          ErrorBoundary={({ children }) => <>{children}</>}
-        />
-        <HistoryPlugin />
-        <OnChangePlugin
-          onChange={(editorState: EditorState) => {
-            onChange(JSON.stringify(editorState.toJSON()));
-          }}
-        />
+            contentEditable={
+              <ContentEditable className="editor-input min-h-[300px] outline-none" />
+            }
+            placeholder={
+              <div className="position-absolute top-8px left-10px fontSize-12px">
+                <div className="editor-placeholder text-gray-400">
+                  Start typing...
+                </div>
+              </div>
+            }
+            ErrorBoundary={({ children }) => <>{children}</>}
+          />
+          <HistoryPlugin />
+          <OnChangePlugin
+            onChange={(editorState: EditorState) => {
+              if (onChange) {
+                onChange(JSON.stringify(editorState.toJSON()));
+              }
+            }}
+          />
         </div>
-          
       </div>
     </LexicalComposer>
-       
-        
   );
 }

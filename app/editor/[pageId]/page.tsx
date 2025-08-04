@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getPageContent, updatePageContent } from "@/lib/firestore.pages";
 import { useAuth } from "@/app/context/AuthContext";
-import LexicalEditorComponent from "@/app/components/LexicalEditorComponents";
+import LexicalEditorComponent from "@/app/components/LexicalEditorComponent";
 import toast from "react-hot-toast";
 
 let timeout: NodeJS.Timeout;
