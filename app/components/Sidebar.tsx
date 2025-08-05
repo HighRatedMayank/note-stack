@@ -17,6 +17,8 @@ import {
   ChevronDown,
   ChevronRight,
   Search,
+  Sun,
+  Moon,
 } from "lucide-react";
 import {
   DndContext,
@@ -32,8 +34,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useTheme } from "next-themes"
-import { Sun, Moon } from "lucide-react"
+import { useTheme } from "next-themes";
 
 interface PageNode {
   id: string;
@@ -57,19 +58,7 @@ export default function Sidebar() {
     })
   );
 
-  function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
-
-  return (
-    <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="mb-4 flex items-center space-x-2 px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-sm text-black dark:text-white hover:opacity-90"
-    >
-      {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-      <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-    </button>
-  )
-}
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     if (!user) return;
@@ -140,14 +129,14 @@ export default function Sidebar() {
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!active || !over || active.id === over.id) return;
-    if (!user) return;
+    if (!active || !over || active.id === over.id) 
+      return;
+    if (!user) 
+      return;
 
     try {
       const activeId = active.id.toString();
       const overId = over.id.toString();
-
-      // Update Firestore to move the active item under the "over" item
       await setDoc(
         doc(db, "users", user.uid, "documents", activeId),
         { parentId: overId },
@@ -181,29 +170,36 @@ export default function Sidebar() {
   };
 
   const filteredPages = searchTerm ? filterPages(pages) : pages;
-
   if (!user) return null;
 
   return (
-    <div className="w-64 bg-white dark:bg-gray-900 text-black dark:text-white h-screen p-4 border-r dark:border-gray-700 overflow-y-auto">
-      <h2 className="text-lg font-bold mb-2">Your Pages</h2>
-      <ThemeToggle />
+    <div className="w-64 h-screen bg-white dark:bg-gray-900 text-black dark:text-white border-r border-gray-200 dark:border-gray-800 p-4 shadow-sm space-y-4 overflow-y-auto">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+          Your Pages
+        </h2>
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+        >
+          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+      </div>
 
-      {/* Search Bar */}
-      <div className="flex items-center bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded mb-4">
-        <Search size={16} className="text-gray-500" />
+      <div className="flex items-center rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-2 py-1">
+        <Search size={16} className="text-gray-500 dark:text-gray-400" />
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search..."
-          className="ml-2 bg-transparent outline-none w-full placeholder:text-sm"
+          className="ml-2 bg-transparent outline-none w-full placeholder:text-sm text-sm"
         />
       </div>
 
       <button
         onClick={() => handleCreate()}
-        className="mb-4 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 w-full"
+        className="w-full rounded-md bg-blue-600 text-white px-3 py-2 text-sm font-medium shadow hover:bg-blue-700 transition"
       >
         + New Page
       </button>
@@ -213,7 +209,7 @@ export default function Sidebar() {
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <div>{renderPages(filteredPages)}</div>
+        <div className="space-y-1">{renderPages(filteredPages)}</div>
       </DndContext>
     </div>
   );
@@ -254,12 +250,14 @@ function SidebarItem({
     paddingLeft: `${depth * 16}px`,
   };
 
+  const isActive = pathname.includes(page.id);
+
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <div
-        className={`flex items-center justify-between pr-2 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded ${
-          pathname.includes(page.id)
-            ? "bg-blue-100 dark:bg-blue-800 font-semibold"
+        className={`flex items-center justify-between py-1.5 px-2 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition ${
+          isActive
+            ? "bg-blue-100 dark:bg-blue-800 font-medium text-blue-900 dark:text-blue-100"
             : ""
         }`}
       >
@@ -273,6 +271,7 @@ function SidebarItem({
                 e.stopPropagation();
                 toggleCollapse(page.id);
               }}
+              className="mr-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
             >
               {collapsed[page.id] ? (
                 <ChevronRight size={16} />
@@ -281,11 +280,11 @@ function SidebarItem({
               )}
             </button>
           )}
-          <span>{page.title}</span>
+          <span className="truncate text-sm">{page.title}</span>
         </div>
         <div className="flex gap-1">
           <button
-            className="text-green-600 hover:text-green-800"
+            className="text-green-600 hover:text-green-700 transition"
             onClick={(e) => {
               e.stopPropagation();
               handleCreate(page.id);
@@ -294,7 +293,7 @@ function SidebarItem({
             <Plus size={16} />
           </button>
           <button
-            className="text-red-600 hover:text-red-800"
+            className="text-red-600 hover:text-red-700 transition"
             onClick={(e) => {
               e.stopPropagation();
               handleDelete(page.id);
@@ -306,7 +305,7 @@ function SidebarItem({
       </div>
 
       {page.children && page.children.length > 0 && !collapsed[page.id] && (
-        <div className="ml-4 border-l border-gray-300 pl-2 dark:border-gray-700">
+        <div className="ml-4 pl-2 border-l border-gray-200 dark:border-gray-700 transition-all">
           {page.children.map((child) => (
             <SidebarItem
               key={child.id}

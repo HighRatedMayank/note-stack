@@ -46,45 +46,47 @@ export default function LexicalEditorComponent({
     editorState:
       initialContent && typeof initialContent === "string"
         ? (editor: LexicalEditor) => {
-          try {
-            const parsed = editor.parseEditorState(initialContent);
-            editor.setEditorState(parsed);
-          } catch (err) {
-            console.warn("Failed to parse initialContent:", err);
+            try {
+              const parsed = editor.parseEditorState(initialContent);
+              editor.setEditorState(parsed);
+            } catch (err) {
+              console.warn("Failed to parse initialContent:", err);
+            }
           }
-        }
         : undefined,
     nodes: [ListNode, ListItemNode, HeadingNode, CodeNode, CodeHighlightNode],
   };
 
   return (
-    <LexicalComposer initialConfig={editorConfig}>
-      <div className="border rounded-md p-4 bg-white shadow-sm">
-        <ToolbarPlugin />
-        <div className="position-relative">
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable className="editor-input min-h-[300px] outline-none" />
-            }
-            placeholder={
-              <div className="position-absolute top-8px left-10px fontSize-12px">
-                <div className="editor-placeholder text-gray-400">
-                  Start typing...
-                </div>
-              </div>
-            }
-            ErrorBoundary={({ children }) => <>{children}</>}
-          />
-          <HistoryPlugin />
-          <OnChangePlugin
-            onChange={(editorState: EditorState) => {
-              if (onChange) {
-                onChange(JSON.stringify(editorState.toJSON()));
+    <div>
+      <LexicalComposer initialConfig={editorConfig}>
+        <div className="border rounded-md p-4 bg-white shadow-sm">
+          <ToolbarPlugin />
+          <div className="position-relative">
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable className="editor-input min-h-[300px] outline-none" />
               }
-            }}
-          />
+              placeholder={
+                <div className="position-absolute top-8px left-10px fontSize-12px">
+                  <div className="editor-placeholder text-gray-400">
+                    Start typing...
+                  </div>
+                </div>
+              }
+              ErrorBoundary={({ children }) => <>{children}</>}
+            />
+            <HistoryPlugin />
+            <OnChangePlugin
+              onChange={(editorState: EditorState) => {
+                if (onChange) {
+                  onChange(JSON.stringify(editorState.toJSON()));
+                }
+              }}
+            />
+          </div>
         </div>
-      </div>
-    </LexicalComposer>
+      </LexicalComposer>
+    </div>
   );
 }

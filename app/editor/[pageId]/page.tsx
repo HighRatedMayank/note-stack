@@ -5,15 +5,18 @@ import { useParams } from "next/navigation";
 import { getPageContent, updatePageContent } from "@/lib/firestore.pages";
 import { useAuth } from "@/app/context/AuthContext";
 import LexicalEditorComponent from "@/app/components/LexicalEditorComponent";
-import toast from "react-hot-toast";
+import { CheckCircle, Loader2 } from "lucide-react";
 
 let timeout: NodeJS.Timeout;
+let statusTimeout: NodeJS.Timeout;
 
 export default function EditorPage() {
   const { pageId } = useParams();
   const { user, loading } = useAuth();
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,33 +33,66 @@ export default function EditorPage() {
   const handleRename = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
+    setIsSaving(true);
+    setIsSaved(false);
     await updatePageContent(pageId as string, content, newTitle);
+    setIsSaving(false);
+    setIsSaved(true);
+
+    clearTimeout(statusTimeout);
+    statusTimeout = setTimeout(() => setIsSaved(false), 1500);
   };
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent);
+    setIsSaving(true);
+    setIsSaved(false);
+
     clearTimeout(timeout);
     timeout = setTimeout(() => {
       updatePageContent(pageId as string, newContent, title).then(() => {
-        toast.success("Auto-saved", { duration: 1000 });
+        setIsSaving(false);
+        setIsSaved(true);
+
+        clearTimeout(statusTimeout);
+        statusTimeout = setTimeout(() => setIsSaved(false), 1500);
       });
     }, 500);
   };
 
-  if (loading || !user) return <div>Loading...</div>;
+  if (loading || !user) return <div className="p-4">Loading...</div>;
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className="px-4 py-6 sm:px-6 md:px-8 max-w-4xl mx-auto relative">
       <input
         value={title}
         onChange={handleRename}
         placeholder="Untitled"
-        className="text-3xl font-bold w-full mb-4 border-b focus:outline-none"
+        className="w-full text-4xl font-bold tracking-tight border-b border-muted bg-transparent py-2 outline-none transition focus:border-blue-500 dark:border-gray-700 dark:focus:border-blue-400"
       />
-      <LexicalEditorComponent
-        initialContent={content}
-        onChange={handleContentChange}
-      />
+
+      {/* 🔄 Autosave Status */}
+      <div className="absolute right-6 top-6 flex items-center text-sm">
+        {isSaving && (
+          <div className="flex items-center text-yellow-500 animate-pulse gap-1">
+            <Loader2 size={16} className="animate-spin" />
+            <span>Saving...</span>
+          </div>
+        )}
+        {!isSaving && isSaved && (
+          <div className="flex items-center text-green-500 gap-1 transition-opacity duration-300">
+            <CheckCircle size={16} />
+            <span>Saved</span>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-6">
+        <LexicalEditorComponent
+          initialContent={content}
+          onChange={handleContentChange}
+        />
+      </div>
     </div>
   );
 }
