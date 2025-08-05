@@ -58,33 +58,34 @@ export default function LexicalEditorComponent({
   };
 
   return (
-    <div>
+    <div className="border rounded-md shadow-sm bg-white dark:bg-gray-900 overflow-hidden">
       <LexicalComposer initialConfig={editorConfig}>
-        <div className="border rounded-md p-4 bg-white shadow-sm">
+        {/* Sticky toolbar */}
+        <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b dark:border-gray-700 px-4 py-2 shadow-sm">
           <ToolbarPlugin />
-          <div className="position-relative">
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable className="editor-input min-h-[300px] outline-none" />
+        </div>
+
+        {/* Editor content area */}
+        <div className="px-4 py-4">
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable className="editor-input min-h-[300px] outline-none text-base text-black dark:text-white" />
+            }
+            placeholder={
+              <div className="absolute text-gray-400 pointer-events-none">
+                Start typing...
+              </div>
+            }
+            ErrorBoundary={({ children }) => <>{children}</>}
+          />
+          <HistoryPlugin />
+          <OnChangePlugin
+            onChange={(editorState: EditorState) => {
+              if (onChange) {
+                onChange(JSON.stringify(editorState.toJSON()));
               }
-              placeholder={
-                <div className="position-absolute top-8px left-10px fontSize-12px">
-                  <div className="editor-placeholder text-gray-400">
-                    Start typing...
-                  </div>
-                </div>
-              }
-              ErrorBoundary={({ children }) => <>{children}</>}
-            />
-            <HistoryPlugin />
-            <OnChangePlugin
-              onChange={(editorState: EditorState) => {
-                if (onChange) {
-                  onChange(JSON.stringify(editorState.toJSON()));
-                }
-              }}
-            />
-          </div>
+            }}
+          />
         </div>
       </LexicalComposer>
     </div>
