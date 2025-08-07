@@ -49,6 +49,8 @@ import {
   AlignRight,
   PaintBucket
 } from "lucide-react";
+import { HexColorPicker } from "react-colorful";  
+import { usePopper } from "react-popper";
 
 export const INSERT_CODE_BLOCK_COMMAND: LexicalCommand<void> = createCommand("INSERT_CODE_BLOCK_COMMAND");
 

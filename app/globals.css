@@ -27,3 +27,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Optional styling for toolbar buttons */
+.toolbar-btn {
+  @apply px-2 py-1 border rounded hover:bg-gray-200 dark:hover:bg-gray-700;
+}
+.toolbar-btn.active {
+  @apply bg-blue-500 text-white;
+}
+
