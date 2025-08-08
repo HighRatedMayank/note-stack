@@ -1,79 +1,105 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { useAuth } from "../context/AuthContext";
-import SaveLoadPlugin from "./SaveLoadPlugin";
-import toast from "react-hot-toast";
+import { getPageContent, updatePageContent } from "@/lib/firestore.pages";
+import { useAuth } from "@/app/context/AuthContext";
+import LexicalEditorComponent from "@/app/components/LexicalEditorComponent";
+import { CheckCircle, Loader2 } from "lucide-react";
 
-const LexicalEditorComponent = dynamic(() => import("./LexicalEditorComponent"), {
-  ssr: false,
-});
+let saveDebounceTimeout: NodeJS.Timeout;
+let statusResetTimeout: NodeJS.Timeout;
 
 export default function EditorPage() {
   const { pageId } = useParams();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
+  // Fetch page content initially
   useEffect(() => {
-    const fetchTitle = async () => {
+    const fetchData = async () => {
       if (!user || !pageId) return;
-      const docRef = doc(db, "users", user.uid, "documents", pageId as string);
-      const snapshot = await getDoc(docRef);
-      const data = snapshot.data();
-      if (data?.title) {
-        setTitle(data.title);
+      const data = await getPageContent(pageId as string);
+      if (data) {
+        setContent(data.content || "");
+        setTitle(data.title || "Untitled");
       }
     };
+    fetchData();
+  }, [pageId, user]);
 
-    fetchTitle();
-  }, [user, pageId]);
-
-  const handleTitleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Rename handler (title input)
+  const handleRename = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
     setIsSaving(true);
-    if (user && pageId) {
-      const docRef = doc(db, "users", user.uid, "documents", pageId as string);
-      await setDoc(docRef, { title: newTitle }, { merge: true });
-    }
+    setIsSaved(false);
+
+    await updatePageContent(pageId as string, content, newTitle);
+
     setIsSaving(false);
+    setIsSaved(true);
+
+    clearTimeout(statusResetTimeout);
+    statusResetTimeout = setTimeout(() => setIsSaved(false), 1500);
   };
 
-  const handleEditorChange = async (content: string) => {
-  if (!user || !pageId) return;
+  // Content change handler (Lexical editor)
+  const handleContentChange = (newContent: string) => {
+    setContent(newContent);
+    setIsSaving(true);
+    setIsSaved(false);
 
-  await setDoc(
-    doc(db, "users", user.uid, "documents", pageId as string),
-    { content },
-    { merge: true }
-  );
+    clearTimeout(saveDebounceTimeout);
+    saveDebounceTimeout = setTimeout(async () => {
+      await updatePageContent(pageId as string, newContent, title);
+      setIsSaving(false);
+      setIsSaved(true);
 
-  toast('Editor content saved!')
-};
+      clearTimeout(statusResetTimeout);
+      statusResetTimeout = setTimeout(() => setIsSaved(false), 1500);
+    }, 500);
+  };
+
+  if (loading || !user) return <div className="p-4">Loading...</div>;
 
   return (
-    <div>
-      <div className="relative flex flex-col gap-2 p-6 max-w-4xl mx-auto w-full">
+    <div className="relative px-4 py-6 sm:px-6 md:px-8 max-w-4xl mx-auto">
+      {/* Title Input */}
       <input
         value={title}
-        onChange={handleTitleChange}
+        onChange={handleRename}
         placeholder="Untitled"
-        className="text-3xl font-bold outline-none bg-transparent border-b border-muted py-1"
+        className="w-full text-4xl font-bold tracking-tight border-b border-muted bg-transparent py-2 outline-none transition focus:border-blue-500 dark:border-gray-700 dark:focus:border-blue-400"
       />
-      {isSaving && (
-        <div className="text-sm text-yellow-500 absolute top-4 right-6 animate-pulse">
-          Saving title...
-        </div>
-      )}
-      <LexicalEditorComponent onChange={handleEditorChange} />
-      <SaveLoadPlugin />
+
+      {/* 🔄 Autosave Status */}
+      <div className="absolute right-6 top-6 flex items-center text-sm">
+        {isSaving && (
+          <div className="flex items-center gap-1 text-yellow-500 animate-pulse">
+            <Loader2 size={16} className="animate-spin" />
+            <span>Saving...</span>
+          </div>
+        )}
+        {!isSaving && isSaved && (
+          <div className="flex items-center gap-1 text-green-500 transition-opacity duration-300">
+            <CheckCircle size={16} />
+            <span>Saved</span>
+          </div>
+        )}
+      </div>
+
+      {/* Editor */}
+      <div className="mt-6">
+        <LexicalEditorComponent
+          initialContent={content}
+          onChange={handleContentChange}
+        />
+      </div>
     </div>
-    </div>
-    
   );
 }

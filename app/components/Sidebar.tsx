@@ -51,6 +51,7 @@ export default function Sidebar() {
   const [pages, setPages] = useState<PageNode[]>([]);
   const [collapsed, setCollapsed] = useState<{ [key: string]: boolean }>({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -170,7 +171,59 @@ export default function Sidebar() {
   };
 
   const filteredPages = searchTerm ? filterPages(pages) : pages;
-  if (!user) return null;
+
+  const sidebarContent = (
+    <div className="w-64 h-full bg-white dark:bg-gray-900 text-black dark:text-white border-r border-gray-200 dark:border-gray-800 p-4 shadow-sm space-y-4 overflow-y-auto">
+      {/* Mobile Close Button */}
+      <div className="md:hidden flex justify-end">
+        <button
+          onClick={() => setIsSidebarOpen(false)}
+          className="text-gray-600 dark:text-gray-300"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Title + Theme Toggle */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold tracking-tight">Your Pages</h2>
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+        >
+          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+      </div>
+
+      {/* Search Box */}
+      <div className="flex items-center rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-2 py-1">
+        <Search size={16} className="text-gray-500 dark:text-gray-400" />
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search..."
+          className="ml-2 bg-transparent outline-none w-full placeholder:text-sm text-sm"
+        />
+      </div>
+
+      {/* Create Button */}
+      <button
+        onClick={() => handleCreate()}
+        className="w-full rounded-md bg-blue-600 text-white px-3 py-2 text-sm font-medium shadow hover:bg-blue-700 transition"
+      >
+        + New Page
+      </button>
+
+      {/* Tree List */}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <div className="space-y-1">{renderPages(filteredPages)}</div>
+      </DndContext>
+    </div>
+  );
+
+  if (!user) 
+    return null;
 
   return (
     <div className="w-64 h-screen bg-white dark:bg-gray-900 text-black dark:text-white border-r border-gray-200 dark:border-gray-800 p-4 shadow-sm space-y-4 overflow-y-auto">
