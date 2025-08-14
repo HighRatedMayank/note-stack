@@ -8,7 +8,7 @@ import { auth } from "../../lib/firebase";
 import { createPage, getUserPages } from "@/lib/firestore.pages";
 import { Plus, FileText, LogOut, User, Calendar, Clock } from "lucide-react";
 import FloatingActionButton from "../components/FloatingActionButton";
-import { LoadingSpinner } from "../components/LoadingSpinner";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();

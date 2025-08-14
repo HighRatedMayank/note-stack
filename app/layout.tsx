@@ -1,3 +1,4 @@
+import "./globals.css";
 import Sidebar from "./components/Sidebar";
 import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "react-hot-toast";

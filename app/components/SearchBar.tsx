@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Search, X, Command, Ctrl } from "lucide-react";
+import { Search, X, Command } from "lucide-react";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -81,7 +81,7 @@ export default function SearchBar({
         {showShortcut && (
           <div className="absolute right-2 flex items-center gap-1">
             <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-mono bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded border border-gray-300 dark:border-gray-600">
-              {isMac ? <Command size={10} /> : <Ctrl size={10} />}
+              {isMac ? <Command size={10} /> : <span className="text-xs">Ctrl</span>}
               <span>K</span>
             </kbd>
           </div>

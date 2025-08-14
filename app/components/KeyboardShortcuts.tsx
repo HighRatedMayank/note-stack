@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Keyboard, X, Command, Ctrl } from "lucide-react";
+import { Keyboard, X, Command } from "lucide-react";
 
 interface Shortcut {
   key: string;
@@ -31,10 +31,7 @@ export default function KeyboardShortcuts() {
     setIsMac(navigator.platform.toUpperCase().indexOf("MAC") >= 0);
   }, []);
 
-  const getModifierIcon = (modifier?: "cmd" | "ctrl") => {
-    if (!modifier) return null;
-    return isMac ? <Command size={14} /> : <Ctrl size={14} />;
-  };
+
 
   const getModifierText = (modifier?: "cmd" | "ctrl") => {
     if (!modifier) return "";

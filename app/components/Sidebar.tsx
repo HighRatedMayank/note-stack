@@ -37,7 +37,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useTheme } from "next-themes";
+
 
 interface PageNode {
   id: string;
@@ -50,13 +50,13 @@ export default function Sidebar() {
   const { user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const { theme } = useTheme();
+
 
   const [pages, setPages] = useState<PageNode[]>([]);
   const [collapsed, setCollapsed] = useState<{ [key: string]: boolean }>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -64,10 +64,7 @@ export default function Sidebar() {
     })
   );
 
-  // Handle hydration mismatch
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+
 
   useEffect(() => {
     if (!user) return;
@@ -381,7 +378,7 @@ function SidebarItem({
         </div>
       </div>
 
-      {hasChildren && !collapsed[page.id] && (
+      {hasChildren && !collapsed[page.id] && page.children && (
         <div className="transition-all duration-200 ease-in-out">
           {page.children.map((child) => (
             <SidebarItem

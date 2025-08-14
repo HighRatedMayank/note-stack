@@ -9,7 +9,7 @@ import FloatingActionButton from "@/app/components/FloatingActionButton";
 import KeyboardShortcuts from "@/app/components/KeyboardShortcuts";
 import Breadcrumbs from "@/app/components/Breadcrumbs";
 import { CheckCircle } from "lucide-react";
-import { LoadingSpinner } from "@/app/components/LoadingSpinner";
+import LoadingSpinner, { ButtonSpinner } from "@/app/components/LoadingSpinner";
 
 let timeout: NodeJS.Timeout;
 let statusTimeout: NodeJS.Timeout;
