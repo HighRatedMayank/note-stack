@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Provider } from "../app/components/Provider"
 import { ThemeProviderWrapper } from "./components/ThemeProviderWrapper"
+import PageTransition from "./components/PageTransition";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <main className="flex-1 min-h-screen transition-all duration-300 ease-in-out">
                   {children}
                 </main>
+                <PageTransition />
               </div>
             </Provider>
           </AuthProvider>
