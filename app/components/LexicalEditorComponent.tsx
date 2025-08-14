@@ -13,6 +13,7 @@ import { ListNode, ListItemNode } from "@lexical/list";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { HeadingNode } from "@lexical/rich-text";
 import ToolbarPlugin from "./ToolbarPlugin";
+import StatusBar from "./StatusBar";
 import "./editor.css";
 
 export default function LexicalEditorComponent({
@@ -90,6 +91,14 @@ export default function LexicalEditorComponent({
             }}
           />
         </div>
+
+        {/* Status Bar */}
+        <StatusBar
+          wordCount={0}
+          characterCount={0}
+          lastModified={new Date().toISOString()}
+          readTime={0}
+        />
       </LexicalComposer>
     </div>
   );
