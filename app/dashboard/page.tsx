@@ -8,6 +8,7 @@ import { auth } from "../../lib/firebase";
 import { createPage, getUserPages } from "@/lib/firestore.pages";
 import { Plus, FileText, LogOut, User, Calendar, Clock } from "lucide-react";
 import FloatingActionButton from "../components/FloatingActionButton";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -59,14 +60,7 @@ export default function DashboardPage() {
   };
 
   if (loading || !user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
-          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <span>Loading dashboard...</span>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner size="lg" text="Loading dashboard..." className="min-h-screen" />;
   }
 
   return (

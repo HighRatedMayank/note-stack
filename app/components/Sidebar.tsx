@@ -17,13 +17,12 @@ import {
   ChevronDown,
   ChevronRight,
   Search,
-  Sun,
-  Moon,
   Menu,
   X,
   FileText,
   Folder,
 } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
 import {
   DndContext,
   closestCenter,
@@ -51,7 +50,7 @@ export default function Sidebar() {
   const { user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
 
   const [pages, setPages] = useState<PageNode[]>([]);
   const [collapsed, setCollapsed] = useState<{ [key: string]: boolean }>({});
@@ -222,17 +221,7 @@ export default function Sidebar() {
               Your Pages
             </h2>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-                aria-label="Toggle theme"
-              >
-                {isMounted && theme === "dark" ? (
-                  <Sun size={18} className="text-gray-600 dark:text-gray-300" />
-                ) : (
-                  <Moon size={18} className="text-gray-600 dark:text-gray-300" />
-                )}
-              </button>
+              <ThemeToggle />
               <button
                 onClick={() => setIsSidebarOpen(false)}
                 className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 md:hidden"

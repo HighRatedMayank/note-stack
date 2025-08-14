@@ -6,7 +6,8 @@ import { getPageContent, updatePageContent } from "@/lib/firestore.pages";
 import { useAuth } from "@/app/context/AuthContext";
 import LexicalEditorComponent from "@/app/components/LexicalEditorComponent";
 import FloatingActionButton from "@/app/components/FloatingActionButton";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle } from "lucide-react";
+import { LoadingSpinner } from "@/app/components/LoadingSpinner";
 
 let timeout: NodeJS.Timeout;
 let statusTimeout: NodeJS.Timeout;
@@ -62,14 +63,7 @@ export default function EditorPage() {
   };
 
   if (loading || !user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
-          <Loader2 size={20} className="animate-spin" />
-          <span>Loading editor...</span>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner size="lg" text="Loading editor..." className="min-h-screen" />;
   }
 
   return (
@@ -90,7 +84,7 @@ export default function EditorPage() {
             <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
               {isSaving && (
                 <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 animate-pulse">
-                  <Loader2 size={16} className="animate-spin" />
+                  <ButtonSpinner size="sm" />
                   <span className="text-sm font-medium hidden sm:inline">Saving...</span>
                 </div>
               )}
