@@ -6,11 +6,28 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --border: #e5e7eb;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --muted: #f9fafb;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --accent-foreground: #171717;
+  --radius: 0.5rem;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -19,20 +36,122 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --border: #27272a;
+    --muted: #18181b;
+    --muted-foreground: #a1a1aa;
+    --accent: #27272a;
+    --accent-foreground: #ededed;
   }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Optional styling for toolbar buttons */
-.toolbar-btn {
-  @apply px-2 py-1 border rounded hover:bg-gray-200 dark:hover:bg-gray-700;
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-slide-out {
+  animation: slideOut 0.3s ease-in;
+}
+
+/* Toolbar button styles */
+.toolbar-btn {
+  @apply px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 ease-in-out;
+  @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900;
+}
+
 .toolbar-btn.active {
-  @apply bg-blue-500 text-white;
+  @apply bg-blue-500 text-white border-blue-500 shadow-md;
+}
+
+.toolbar-btn:hover:not(.active) {
+  @apply transform scale-105;
+}
+
+/* Editor content styles */
+.editor-input {
+  @apply prose prose-gray dark:prose-invert max-w-none;
+  @apply prose-headings:font-semibold prose-headings:tracking-tight;
+  @apply prose-p:leading-relaxed prose-p:text-gray-700 dark:prose-p:text-gray-300;
+  @apply prose-strong:text-gray-900 dark:prose-strong:text-gray-100;
+  @apply prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded;
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+  .editor-input {
+    @apply prose-sm;
+  }
+}
+
+@media (min-width: 768px) {
+  .editor-input {
+    @apply prose-lg;
+  }
 }
 

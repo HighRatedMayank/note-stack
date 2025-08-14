@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { getPageContent, updatePageContent } from "@/lib/firestore.pages";
 import { useAuth } from "@/app/context/AuthContext";
 import LexicalEditorComponent from "@/app/components/LexicalEditorComponent";
+import FloatingActionButton from "@/app/components/FloatingActionButton";
 import { CheckCircle, Loader2 } from "lucide-react";
 
 let timeout: NodeJS.Timeout;
@@ -60,39 +61,62 @@ export default function EditorPage() {
     }, 500);
   };
 
-  if (loading || !user) return <div className="p-4">Loading...</div>;
+  if (loading || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
+          <Loader2 size={20} className="animate-spin" />
+          <span>Loading editor...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="px-4 py-6 sm:px-6 md:px-8 max-w-4xl mx-auto relative">
-      <input
-        value={title}
-        onChange={handleRename}
-        placeholder="Untitled"
-        className="w-full text-4xl font-bold tracking-tight border-b border-muted bg-transparent py-2 outline-none transition focus:border-blue-500 dark:border-gray-700 dark:focus:border-blue-400"
-      />
-
-      {/* 🔄 Autosave Status */}
-      <div className="absolute right-6 top-6 flex items-center text-sm">
-        {isSaving && (
-          <div className="flex items-center text-yellow-500 animate-pulse gap-1">
-            <Loader2 size={16} className="animate-spin" />
-            <span>Saving...</span>
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
+      {/* Header Section */}
+      <div className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="relative">
+            {/* Title Input */}
+            <input
+              value={title}
+              onChange={handleRename}
+              placeholder="Untitled"
+              className="w-full text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 bg-transparent border-none outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all duration-200 focus:ring-0"
+            />
+            
+            {/* Autosave Status */}
+            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+              {isSaving && (
+                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 animate-pulse">
+                  <Loader2 size={16} className="animate-spin" />
+                  <span className="text-sm font-medium hidden sm:inline">Saving...</span>
+                </div>
+              )}
+              {!isSaving && isSaved && (
+                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 animate-fade-in">
+                  <CheckCircle size={16} />
+                  <span className="text-sm font-medium hidden sm:inline">Saved</span>
+                </div>
+              )}
+            </div>
           </div>
-        )}
-        {!isSaving && isSaved && (
-          <div className="flex items-center text-green-500 gap-1 transition-opacity duration-300">
-            <CheckCircle size={16} />
-            <span>Saved</span>
-          </div>
-        )}
+        </div>
       </div>
 
-      <div className="mt-6">
-        <LexicalEditorComponent
-          initialContent={content}
-          onChange={handleContentChange}
-        />
+      {/* Editor Content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="animate-fade-in">
+          <LexicalEditorComponent
+            initialContent={content}
+            onChange={handleContentChange}
+          />
+        </div>
       </div>
+
+      {/* Floating Action Button for Mobile */}
+      <FloatingActionButton />
     </div>
   );
 }

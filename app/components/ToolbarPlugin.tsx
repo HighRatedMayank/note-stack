@@ -32,16 +32,17 @@ import {
   AlignCenter,
   AlignRight,
   PaintBucket,
+  Type,
+  List,
+  Quote,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { $createParagraphNode, $getNodeByKey, $isParagraphNode } from "lexical";
 import { $createQuoteNode } from "@lexical/rich-text";
 import { $createHeadingNode } from "@lexical/rich-text";
-import { Loader2 } from "lucide-react";
 
-const btnBase =
-  "p-1 px-2 border rounded text-sm hover:bg-gray-100 dark:hover:bg-gray-800";
+const btnBase = "toolbar-btn";
 
 export default function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
@@ -49,9 +50,6 @@ export default function ToolbarPlugin() {
   const [color, setColor] = useState("#000000");
   const [showTextColor, setShowTextColor] = useState(false);
   const [showBgColor, setShowBgColor] = useState(false);
-
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();
@@ -125,156 +123,172 @@ export default function ToolbarPlugin() {
   };
 
   return (
-    <div className="flex gap-2 flex-wrap mb-4 items-center border-b pb-2">
-      {saveStatus === "saving" && (
-  <div className="flex items-center gap-1 animate-pulse">
-    <Loader2 className="w-4 h-4 animate-spin" />
-    <span>Saving...</span>
-  </div>
-)}
-<div className="absolute top-2 right-4 text-sm text-gray-500 dark:text-gray-400 transition-opacity duration-300">
-  {saveStatus === "saving" && (
-    <span className="animate-pulse">Saving...</span>
-  )}
-  {saveStatus === "saved" && (
-    <span className="text-green-500">✓ Saved</span>
-  )}
-</div>
-
-      {/* Formatting buttons */}
-      <button
-        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")}
-        className={btnBase}
-      >
-        <Bold size={16} />
-      </button>
-      <button
-        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")}
-        className={btnBase}
-      >
-        <Italic size={16} />
-      </button>
-      <button
-        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline")}
-        className={btnBase}
-      >
-        <Underline size={16} />
-      </button>
-      <button
-        onClick={() =>
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough")
-        }
-        className={btnBase}
-      >
-        <Strikethrough size={16} />
-      </button>
-
-      {/* Heading Dropdown */}
-      <select
-        className={`${btnBase} cursor-pointer`}
-        value={blockType}
-        onChange={(e) => {
-          const value = e.target.value;
-          editor.update(() => {
-            const selection = $getSelection();
-            if ($isRangeSelection(selection)) {
-              switch (value) {
-                case "paragraph":
-                  $setBlocksType(selection, () => $createParagraphNode());
-                  break;
-                case "h1":
-                case "h2":
-                case "h3":
-                  $setBlocksType(selection, () =>
-                    $createHeadingNode(value as "h1" | "h2" | "h3")
-                  );
-                  break;
-                case "quote":
-                  $setBlocksType(selection, () => $createQuoteNode());
-                  break;
-              }
-            }
-          });
-        }}
-      >
-        <option value="paragraph">Paragraph</option>
-        <option value="h1">Heading 1</option>
-        <option value="h2">Heading 2</option>
-        <option value="h3">Heading 3</option>
-        <option value="quote">Quote</option>
-      </select>
-
-      {/* Undo/Redo */}
-      <button
-        onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)}
-        className={btnBase}
-      >
-        <Undo size={16} />
-      </button>
-      <button
-        onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)}
-        className={btnBase}
-      >
-        <Redo size={16} />
-      </button>
-
-      {/* Alignment */}
-      <button
-        onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left")}
-        className={btnBase}
-      >
-        <AlignLeft size={16} />
-      </button>
-      <button
-        onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center")}
-        className={btnBase}
-      >
-        <AlignCenter size={16} />
-      </button>
-      <button
-        onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right")}
-        className={btnBase}
-      >
-        <AlignRight size={16} />
-      </button>
-
-      {/* Color Picker (Text) */}
-      <div className="relative">
-        <button onClick={() => setShowTextColor((v) => !v)} className={btnBase}>
-          <div
-            className="w-4 h-4 rounded"
-            style={{ backgroundColor: color }}
-          ></div>
+    <div className="flex flex-wrap gap-2 items-center">
+      {/* Text Formatting Group */}
+      <div className="flex items-center gap-1 p-1 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <button
+          onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")}
+          className={btnBase}
+          title="Bold (Ctrl+B)"
+        >
+          <Bold size={16} />
         </button>
-        {showTextColor && (
-          <div className="absolute z-50 mt-2 bg-white p-2 rounded shadow border dark:bg-gray-800">
-            <HexColorPicker color={color} onChange={setColor} />
-            <button
-              onClick={() => formatTextStyle("color")}
-              className="mt-2 w-full text-sm bg-black text-white px-2 py-1 rounded"
-            >
-              Apply Text Color
-            </button>
-          </div>
-        )}
+        <button
+          onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")}
+          className={btnBase}
+          title="Italic (Ctrl+I)"
+        >
+          <Italic size={16} />
+        </button>
+        <button
+          onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline")}
+          className={btnBase}
+          title="Underline (Ctrl+U)"
+        >
+          <Underline size={16} />
+        </button>
+        <button
+          onClick={() =>
+            editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough")
+          }
+          className={btnBase}
+          title="Strikethrough"
+        >
+          <Strikethrough size={16} />
+        </button>
       </div>
 
-      {/* Color Picker (Highlight) */}
-      <div className="relative">
-        <button onClick={() => setShowBgColor((v) => !v)} className={btnBase}>
-          <PaintBucket size={16} />
+      {/* Block Type Group */}
+      <div className="flex items-center gap-1 p-1 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <select
+          className={`${btnBase} cursor-pointer min-w-[120px]`}
+          value={blockType}
+          onChange={(e) => {
+            const value = e.target.value;
+            editor.update(() => {
+              const selection = $getSelection();
+              if ($isRangeSelection(selection)) {
+                switch (value) {
+                  case "paragraph":
+                    $setBlocksType(selection, () => $createParagraphNode());
+                    break;
+                  case "h1":
+                  case "h2":
+                  case "h3":
+                    $setBlocksType(selection, () =>
+                      $createHeadingNode(value as "h1" | "h2" | "h3")
+                    );
+                    break;
+                  case "quote":
+                    $setBlocksType(selection, () => $createQuoteNode());
+                    break;
+                }
+              }
+            });
+          }}
+        >
+          <option value="paragraph">Paragraph</option>
+          <option value="h1">Heading 1</option>
+          <option value="h2">Heading 2</option>
+          <option value="h3">Heading 3</option>
+          <option value="quote">Quote</option>
+        </select>
+      </div>
+
+      {/* Alignment Group */}
+      <div className="flex items-center gap-1 p-1 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <button
+          onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left")}
+          className={btnBase}
+          title="Align Left"
+        >
+          <AlignLeft size={16} />
         </button>
-        {showBgColor && (
-          <div className="absolute z-50 mt-2 bg-white p-2 rounded shadow border dark:bg-gray-800">
-            <HexColorPicker color={color} onChange={setColor} />
-            <button
-              onClick={() => formatTextStyle("bgcolor")}
-              className="mt-2 w-full text-sm bg-yellow-400 text-black px-2 py-1 rounded"
-            >
-              Apply Highlight
-            </button>
-          </div>
-        )}
+        <button
+          onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center")}
+          className={btnBase}
+          title="Align Center"
+        >
+          <AlignCenter size={16} />
+        </button>
+        <button
+          onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right")}
+          className={btnBase}
+          title="Align Right"
+        >
+          <AlignRight size={16} />
+        </button>
+      </div>
+
+      {/* History Group */}
+      <div className="flex items-center gap-1 p-1 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <button
+          onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)}
+          className={btnBase}
+          title="Undo (Ctrl+Z)"
+        >
+          <Undo size={16} />
+        </button>
+        <button
+          onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)}
+          className={btnBase}
+          title="Redo (Ctrl+Y)"
+        >
+          <Redo size={16} />
+        </button>
+      </div>
+
+      {/* Color Picker Group */}
+      <div className="flex items-center gap-1 p-1 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        {/* Text Color Picker */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowTextColor((v) => !v)} 
+            className={btnBase}
+            title="Text Color"
+          >
+            <Type size={16} />
+          </button>
+          {showTextColor && (
+            <div className="absolute z-50 mt-2 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+              <HexColorPicker color={color} onChange={setColor} />
+              <button
+                onClick={() => {
+                  formatTextStyle("color");
+                  setShowTextColor(false);
+                }}
+                className="mt-3 w-full text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md transition-colors duration-200"
+              >
+                Apply Text Color
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Background Color Picker */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowBgColor((v) => !v)} 
+            className={btnBase}
+            title="Background Color"
+          >
+            <PaintBucket size={16} />
+          </button>
+          {showBgColor && (
+            <div className="absolute z-50 mt-2 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+              <HexColorPicker color={color} onChange={setColor} />
+              <button
+                onClick={() => {
+                  formatTextStyle("bgcolor");
+                  setShowBgColor(false);
+                }}
+                className="mt-3 w-full text-sm bg-yellow-500 hover:bg-yellow-600 text-black px-3 py-2 rounded-md transition-colors duration-200"
+              >
+                Apply Highlight
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
