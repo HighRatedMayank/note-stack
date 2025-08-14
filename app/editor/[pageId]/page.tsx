@@ -6,6 +6,8 @@ import { getPageContent, updatePageContent } from "@/lib/firestore.pages";
 import { useAuth } from "@/app/context/AuthContext";
 import LexicalEditorComponent from "@/app/components/LexicalEditorComponent";
 import FloatingActionButton from "@/app/components/FloatingActionButton";
+import KeyboardShortcuts from "@/app/components/KeyboardShortcuts";
+import Breadcrumbs from "@/app/components/Breadcrumbs";
 import { CheckCircle } from "lucide-react";
 import { LoadingSpinner } from "@/app/components/LoadingSpinner";
 
@@ -101,6 +103,7 @@ export default function EditorPage() {
 
       {/* Editor Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <Breadcrumbs />
         <div className="animate-fade-in">
           <LexicalEditorComponent
             initialContent={content}
@@ -111,6 +114,9 @@ export default function EditorPage() {
 
       {/* Floating Action Button for Mobile */}
       <FloatingActionButton />
+      
+      {/* Keyboard Shortcuts for Mobile */}
+      <KeyboardShortcuts />
     </div>
   );
 }

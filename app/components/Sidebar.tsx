@@ -16,13 +16,13 @@ import {
   Trash2,
   ChevronDown,
   ChevronRight,
-  Search,
   Menu,
   X,
   FileText,
   Folder,
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import SearchBar from "./SearchBar";
 import {
   DndContext,
   closestCenter,
@@ -234,16 +234,12 @@ export default function Sidebar() {
 
           {/* Search */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search pages..."
-                className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              />
-            </div>
+            <SearchBar
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search pages..."
+              showShortcut={false}
+            />
           </div>
 
           {/* Create Button */}
