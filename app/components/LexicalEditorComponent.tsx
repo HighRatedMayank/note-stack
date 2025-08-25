@@ -14,14 +14,21 @@ import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { HeadingNode } from "@lexical/rich-text";
 import ToolbarPlugin from "./ToolbarPlugin";
 import StatusBar from "./StatusBar";
+import YjsPlugin from "./YjsPlugin";
 import "./editor.css";
 
 export default function LexicalEditorComponent({
   onChange,
   initialContent,
+  docId,
+  username,
+  enableCollaboration = false,
 }: {
   onChange: (value: string) => void;
   initialContent?: string;
+  docId?: string;
+  username?: string;
+  enableCollaboration?: boolean;
 }) {
   const editorConfig: InitialConfigType = {
     namespace: "MyEditor",
@@ -62,6 +69,7 @@ export default function LexicalEditorComponent({
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
       <LexicalComposer initialConfig={editorConfig}>
+        
         {/* Enhanced Sticky Toolbar */}
         <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="px-4 py-3">
@@ -90,6 +98,16 @@ export default function LexicalEditorComponent({
               }
             }}
           />
+          
+          {/* Collaborative Editing Plugin */}
+          {enableCollaboration && docId && username && (
+            <YjsPlugin
+              docId={docId}
+              username={username}
+              color="#3b82f6"
+              wsEndpoint="ws://localhost:1234"
+            />
+          )}
         </div>
 
         {/* Status Bar */}

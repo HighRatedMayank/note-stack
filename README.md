@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Note Stack
+
+A modern, collaborative note-taking application built with Next.js, Lexical editor, and Firebase.
+
+## Features
+
+- 📝 Rich text editing with Lexical
+- 🔄 Real-time collaborative editing with Yjs
+- 🌙 Dark/Light theme support
+- 📱 Mobile-responsive design
+- 🔐 Firebase authentication
+- 💾 Auto-save functionality
+- 🎨 Modern UI with Tailwind CSS
+
+## Collaborative Editing
+
+This application supports real-time collaborative editing using Yjs and WebSocket. Multiple users can edit the same document simultaneously.
+
+### Setup
+
+1. **Start the collaboration server:**
+   ```bash
+   npm run collab-server
+   ```
+   This starts the WebSocket server on port 1234.
+
+2. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+3. **Enable collaboration:**
+   - Open a document in the editor
+   - Collaboration is automatically enabled for all documents
+   - Multiple users can now edit the same document simultaneously
+
+### How it works
+
+- Each document has a unique ID that's used for collaboration
+- Users are identified by their display name or email
+- Changes are synchronized in real-time via WebSocket
+- User presence is tracked and displayed
+
+### Technical Details
+
+- **Yjs**: Provides the collaborative editing framework
+- **y-websocket**: Handles WebSocket communication
+- **@lexical/yjs**: Integrates Yjs with Lexical editor
+- **Custom WebSocket server**: Manages document synchronization
 
 ## Getting Started
 
-First, run the development server:
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. **Set up Firebase:**
+   - Create a Firebase project
+   - Enable Authentication and Firestore
+   - Add your Firebase config to `lib/firebase.ts`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. **Start the collaboration server:**
+   ```bash
+   npm run collab-server
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+5. **Open your browser:**
+   Navigate to `http://localhost:3000`
 
-## Learn More
+## Development
 
-To learn more about Next.js, take a look at the following resources:
+- **TypeScript**: Full type safety
+- **ESLint**: Code linting
+- **Tailwind CSS**: Utility-first CSS framework
+- **Next.js 15**: React framework with App Router
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run collab-server` - Start collaboration server
 
-## Deploy on Vercel
+## Architecture
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Frontend**: Next.js with TypeScript
+- **Editor**: Lexical with collaborative editing
+- **Backend**: Firebase (Auth + Firestore)
+- **Collaboration**: Yjs + WebSocket
+- **Styling**: Tailwind CSS
+- **State Management**: React Context + Hooks

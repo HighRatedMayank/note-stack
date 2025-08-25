@@ -108,6 +108,9 @@ export default function EditorPage() {
           <LexicalEditorComponent
             initialContent={content}
             onChange={handleContentChange}
+            docId={pageId as string}
+            username={user?.displayName || user?.email || "Anonymous"}
+            enableCollaboration={true}
           />
         </div>
       </div>
