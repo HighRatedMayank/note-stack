@@ -120,11 +120,6 @@ export function SearchWithSuggestions({
   className?: string;
 }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [isMac, setIsMac] = useState(false);
-
-  useEffect(() => {
-    setIsMac(navigator.platform.toUpperCase().indexOf("MAC") >= 0);
-  }, []);
 
   const filteredSuggestions = suggestions.filter(
     (suggestion) =>

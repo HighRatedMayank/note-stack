@@ -33,12 +33,10 @@ import {
   AlignRight,
   PaintBucket,
   Type,
-  List,
-  Quote,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { HexColorPicker } from "react-colorful";
-import { $createParagraphNode, $getNodeByKey, $isParagraphNode } from "lexical";
+import { $createParagraphNode, $isParagraphNode } from "lexical";
 import { $createQuoteNode } from "@lexical/rich-text";
 import { $createHeadingNode } from "@lexical/rich-text";
 

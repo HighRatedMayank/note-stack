@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Smartphone, Monitor } from "lucide-react";
+
 
 export default function MobileOptimizations() {
   const [isMobile, setIsMobile] = useState(false);

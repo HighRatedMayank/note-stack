@@ -2,7 +2,7 @@
 
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import { createPage, getUserPages } from "@/lib/firestore.pages";
@@ -19,16 +19,16 @@ export default function DashboardPage() {
     if (!loading && !user) {
       router.push("/login");
     }
-  }, [loading, user]);
+  }, [loading, user, router]);
+
+  const loadPages = useCallback(async () => {
+    const userPages = await getUserPages(user!.uid);
+    setPages(userPages);
+  }, [user]);
 
   useEffect(() => {
     if (user) loadPages();
-  }, [user]);
-
-  const loadPages = async () => {
-    const userPages = await getUserPages(user!.uid);
-    setPages(userPages);
-  };
+  }, [user, loadPages]);
 
   const handleCreate = async () => {
     if (!user) {
