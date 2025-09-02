@@ -11,7 +11,7 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { EditorState, LexicalEditor } from "lexical";
 import { ListNode, ListItemNode } from "@lexical/list";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
-import { HeadingNode } from "@lexical/rich-text";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import ToolbarPlugin from "./ToolbarPlugin";
 import StatusBar from "./StatusBar";
 import YjsPlugin from "./YjsPlugin";
@@ -63,7 +63,7 @@ export default function LexicalEditorComponent({
             }
           }
         : undefined,
-    nodes: [ListNode, ListItemNode, HeadingNode, CodeNode, CodeHighlightNode],
+    nodes: [ListNode, ListItemNode, HeadingNode, CodeNode, CodeHighlightNode, QuoteNode],
   };
 
   return (
