@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../../lib/firebase";
-import { createPage, getUserPages } from "@/lib/firestore.pages";
-import { Plus, FileText, LogOut, User, Calendar, Clock } from "lucide-react";
+import { createPage, getUserPages, deletePage } from "@/lib/firestore.pages";
+import { Plus, FileText, LogOut, User, Calendar, Clock, Trash2 } from "lucide-react";
 import FloatingActionButton from "../components/FloatingActionButton";
 import LoadingSpinner from "../components/LoadingSpinner";
 
@@ -37,6 +37,18 @@ export default function DashboardPage() {
     }
     const pageId = await createPage(user.uid);
     router.push(`/editor/${pageId}`);
+  };
+
+  const handleDelete = async (pageId: string) => {
+    if (!user) return;
+    
+    try {
+      await deletePage(pageId);
+      // Reload pages after deletion
+      await loadPages();
+    } catch (error) {
+      console.error("Failed to delete page:", error);
+    }
   };
 
   const handleSignOut = () => {
@@ -198,11 +210,13 @@ export default function DashboardPage() {
               {pages.slice(0, 6).map((page) => (
                 <div
                   key={page.id}
-                  onClick={() => router.push(`/editor/${page.id}`)}
-                  className="group p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md cursor-pointer transition-all duration-200"
+                  className="group p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-200"
                 >
                   <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
+                    <div 
+                      className="flex-1 min-w-0 cursor-pointer"
+                      onClick={() => router.push(`/editor/${page.id}`)}
+                    >
                       <h3 className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200 truncate">
                         {page.title || "Untitled Page"}
                       </h3>
@@ -211,7 +225,19 @@ export default function DashboardPage() {
                         {formatDate(page.createdAt)}
                       </p>
                     </div>
-                    <FileText size={16} className="text-gray-400 dark:text-gray-500 group-hover:text-blue-500 transition-colors duration-200" />
+                    <div className="flex items-center gap-2">
+                      <FileText size={16} className="text-gray-400 dark:text-gray-500 group-hover:text-blue-500 transition-colors duration-200" />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(page.id);
+                        }}
+                        className="p-1 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors duration-200"
+                        title="Delete page"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

@@ -13,11 +13,18 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { debounce } from "lodash";
 import { useAuth } from "../context/AuthContext";
 
-export default function SaveLoadPlugin() {
+export default function SaveLoadPlugin({ 
+  title, 
+  onContentLoad 
+}: { 
+  title?: string;
+  onContentLoad?: (content: string, title: string) => void;
+}) {
   const [editor] = useLexicalComposerContext();
   const { user } = useAuth();
   const { pageId } = useParams();
   const [status, setStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const hasLoadedRef = useRef(false); // Prevent multiple content loads
 
   const saveContent = async (editorState: EditorState) => {
     if (!user || !pageId) return;
@@ -31,9 +38,20 @@ export default function SaveLoadPlugin() {
       });
     });
 
+    // Only save title if it's provided and different from "Untitled"
+    const saveData: any = { 
+      content: htmlString,
+      authorId: user.uid,
+      updatedAt: new Date()
+    };
+    
+    if (title && title !== "Untitled") {
+      saveData.title = title;
+    }
+
     await setDoc(
-      doc(db, "users", user.uid, "documents", pageId as string),
-      { content: htmlString },
+      doc(db, "pages", pageId as string),
+      saveData,
       { merge: true }
     );
 
@@ -51,24 +69,35 @@ export default function SaveLoadPlugin() {
 
   useEffect(() => {
     const loadContent = async () => {
-      if (!user || !pageId) return;
-      const docRef = doc(db, "users", user.uid, "documents", pageId as string);
+      if (!user || !pageId || hasLoadedRef.current) return; // Don't reload if already loaded
+      
+      const docRef = doc(db, "pages", pageId as string);
       const snapshot = await getDoc(docRef);
       const data = snapshot.data();
 
-      if (data?.content) {
-        editor.update(() => {
-          const root = $getRoot();
-          root.clear();
-          const paragraph = $createParagraphNode();
-          paragraph.append($createTextNode(data.content));
-          root.append(paragraph);
-        });
+      if (data) {
+        // Load content if it exists
+        if (data.content) {
+          editor.update(() => {
+            const root = $getRoot();
+            root.clear();
+            const paragraph = $createParagraphNode();
+            paragraph.append($createTextNode(data.content));
+            root.append(paragraph);
+          });
+        }
+        
+        // Always notify parent component about loaded data (content and/or title)
+        if (onContentLoad) {
+          onContentLoad(data.content || "", data.title || "Untitled");
+        }
+        
+        hasLoadedRef.current = true; // Mark as loaded
       }
     };
 
     loadContent();
-  }, [editor, user, pageId]);
+  }, [editor, user, pageId, onContentLoad]);
 
   return (
     <div className="absolute top-4 right-6 z-50">

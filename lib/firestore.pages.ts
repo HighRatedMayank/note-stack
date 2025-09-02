@@ -16,16 +16,22 @@ export const createPage = async (userId: string, title: string = "Untitled") => 
 export const getUserPages = async (userId: string) => {
     const q = query(collection(db, "pages"), where("authorId", "==", userId));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .filter((page: any) => !page.deleted); // Filter out deleted pages
 }
 
 export const getPageContent = async (pageId: string) => {
   const docRef = doc(db, "pages", pageId);
   const docSnap = await getDoc(docRef)
   if (docSnap.exists()) {
-    return docSnap.data().content || "";
+    const data = docSnap.data();
+    return {
+      content: data.content || "",
+      title: data.title || "Untitled"
+    };
   }
-  return "";
+  return { content: "", title: "Untitled" };
 }
 
 export const updatePageContent = async (
@@ -43,4 +49,9 @@ export const updatePageContent = async (
     },
     { merge: true }
   );
+};
+
+export const deletePage = async (pageId: string) => {
+  const docRef = doc(db, "pages", pageId);
+  await setDoc(docRef, { deleted: true, deletedAt: Timestamp.now() }, { merge: true });
 };

@@ -11,57 +11,75 @@ import Breadcrumbs from "@/app/components/Breadcrumbs";
 import { CheckCircle } from "lucide-react";
 import LoadingSpinner, { ButtonSpinner } from "@/app/components/LoadingSpinner";
 
-let timeout: NodeJS.Timeout;
-let statusTimeout: NodeJS.Timeout;
+
 
 export default function EditorPage() {
   const { pageId } = useParams();
   const { user, loading } = useAuth();
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
+  const [inputTitle, setInputTitle] = useState(""); // Local state for input
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
+  // Load initial data when component mounts
   useEffect(() => {
-    const fetchData = async () => {
+    const loadInitialData = async () => {
       if (!user || !pageId) return;
-      const data = await getPageContent(pageId as string);
-      if (data) {
-        setContent(data.content || "");
-        setTitle(data.title || "Untitled");
+      try {
+        const data = await getPageContent(pageId as string);
+        if (data) {
+          setContent(data.content || "");
+          setTitle(data.title || "Untitled");
+          setInputTitle(data.title || "Untitled"); // Set input title too
+        }
+      } catch (error) {
+        console.error("Failed to load initial data:", error);
       }
     };
-    fetchData();
-  }, [pageId, user]);
 
-  const handleRename = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value;
-    setTitle(newTitle);
+    loadInitialData();
+  }, [user, pageId]);
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputTitle(e.target.value); // Only update local input state
+  };
+
+  const handleTitleSave = async () => {
+    if (inputTitle.trim() === "") {
+      setInputTitle("Untitled");
+      setTitle("Untitled");
+      return;
+    }
+    
+    if (inputTitle === title) return; // No change needed
+    
+    setTitle(inputTitle);
     setIsSaving(true);
     setIsSaved(false);
-    await updatePageContent(pageId as string, content, newTitle);
-    setIsSaving(false);
-    setIsSaved(true);
-
-    clearTimeout(statusTimeout);
-    statusTimeout = setTimeout(() => setIsSaved(false), 1500);
+    
+    try {
+      await updatePageContent(pageId as string, content, inputTitle);
+      setIsSaving(false);
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 1500);
+    } catch (error) {
+      console.error("Failed to save title:", error);
+      setIsSaving(false);
+      // Revert on error
+      setInputTitle(title);
+    }
   };
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent);
-    setIsSaving(true);
-    setIsSaved(false);
+    // Content saving is now handled by SaveLoadPlugin
+  };
 
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      updatePageContent(pageId as string, newContent, title).then(() => {
-        setIsSaving(false);
-        setIsSaved(true);
-
-        clearTimeout(statusTimeout);
-        statusTimeout = setTimeout(() => setIsSaved(false), 1500);
-      });
-    }, 500);
+  const handleContentLoad = (content: string, title: string) => {
+    setContent(content);
+    setTitle(title);
+    setInputTitle(title); // Also update input title
   };
 
   if (loading || !user) {
@@ -76,8 +94,9 @@ export default function EditorPage() {
           <div className="relative">
             {/* Title Input */}
             <input
-              value={title}
-              onChange={handleRename}
+              value={inputTitle}
+              onChange={handleTitleChange}
+              onBlur={handleTitleSave}
               placeholder="Untitled"
               className="w-full text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 bg-transparent border-none outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all duration-200 focus:ring-0"
             />
@@ -111,6 +130,8 @@ export default function EditorPage() {
             docId={pageId as string}
             username={user?.displayName || user?.email || "Anonymous"}
             enableCollaboration={true}
+            title={title}
+            onContentLoad={handleContentLoad}
           />
         </div>
       </div>

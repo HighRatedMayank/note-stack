@@ -15,6 +15,7 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import ToolbarPlugin from "./ToolbarPlugin";
 import StatusBar from "./StatusBar";
 import YjsPlugin from "./YjsPlugin";
+import SaveLoadPlugin from "./SaveLoadPlugin";
 import "./editor.css";
 
 export default function LexicalEditorComponent({
@@ -23,12 +24,16 @@ export default function LexicalEditorComponent({
   docId,
   username,
   enableCollaboration = false,
+  title,
+  onContentLoad,
 }: {
   onChange: (value: string) => void;
   initialContent?: string;
   docId?: string;
   username?: string;
   enableCollaboration?: boolean;
+  title?: string;
+  onContentLoad?: (content: string, title: string) => void;
 }) {
   const editorConfig: InitialConfigType = {
     namespace: "MyEditor",
@@ -98,6 +103,9 @@ export default function LexicalEditorComponent({
               }
             }}
           />
+          
+          {/* Save/Load Plugin */}
+          <SaveLoadPlugin title={title} onContentLoad={onContentLoad} />
           
           {/* Collaborative Editing Plugin */}
           {enableCollaboration && docId && username && (
