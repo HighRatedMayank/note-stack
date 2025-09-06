@@ -12,6 +12,7 @@ import { EditorState, LexicalEditor } from "lexical";
 import { ListNode, ListItemNode } from "@lexical/list";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import { useState } from "react";
 import ToolbarPlugin from "./ToolbarPlugin";
 import StatusBar from "./StatusBar";
 import YjsPlugin from "./YjsPlugin";
