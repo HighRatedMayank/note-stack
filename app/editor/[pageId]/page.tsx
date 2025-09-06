@@ -8,6 +8,7 @@ import LexicalEditorComponent from "@/app/components/LexicalEditorComponent";
 import FloatingActionButton from "@/app/components/FloatingActionButton";
 import KeyboardShortcuts from "@/app/components/KeyboardShortcuts";
 import Breadcrumbs from "@/app/components/Breadcrumbs";
+import ShareButton from "@/app/components/ShareButton";
 import { CheckCircle } from "lucide-react";
 import LoadingSpinner, { ButtonSpinner } from "@/app/components/LoadingSpinner";
 
@@ -101,8 +102,12 @@ export default function EditorPage() {
               className="w-full text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 bg-transparent border-none outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all duration-200 focus:ring-0"
             />
             
-            {/* Autosave Status */}
-            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+            {/* Share Button and Autosave Status */}
+            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center gap-3">
+              {/* Share Button */}
+              <ShareButton pageId={pageId as string} title={title} />
+              
+              {/* Autosave Status */}
               {isSaving && (
                 <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 animate-pulse">
                   <ButtonSpinner size="sm" />
