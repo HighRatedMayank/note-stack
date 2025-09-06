@@ -16,6 +16,8 @@ import ToolbarPlugin from "./ToolbarPlugin";
 import StatusBar from "./StatusBar";
 import YjsPlugin from "./YjsPlugin";
 import SaveLoadPlugin from "./SaveLoadPlugin";
+import UserPresence from "./UserPresence";
+import CollaborativeCursors from "./CollaborativeCursors";
 import "./editor.css";
 
 export default function LexicalEditorComponent({
@@ -35,6 +37,9 @@ export default function LexicalEditorComponent({
   title?: string;
   onContentLoad?: (content: string, title: string) => void;
 }) {
+  const [collaborativeUsers, setCollaborativeUsers] = useState<Array<{ name: string; color: string; clientId: number }>>([]);
+  const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
+  const [yjsBinding, setYjsBinding] = useState<any>(null);
   const editorConfig: InitialConfigType = {
     namespace: "MyEditor",
     theme: {
@@ -72,7 +77,7 @@ export default function LexicalEditorComponent({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden relative">
       <LexicalComposer initialConfig={editorConfig}>
         
         {/* Enhanced Sticky Toolbar */}
@@ -83,7 +88,7 @@ export default function LexicalEditorComponent({
         </div>
 
         {/* Editor Content Area */}
-        <div className="px-4 sm:px-6 py-6">
+        <div className="px-4 sm:px-6 py-6 relative">
           <RichTextPlugin
             contentEditable={
               <ContentEditable className="editor-input min-h-[400px] sm:min-h-[500px] outline-none text-base text-gray-900 dark:text-gray-100 leading-relaxed" />
@@ -114,7 +119,15 @@ export default function LexicalEditorComponent({
               username={username}
               color="#3b82f6"
               wsEndpoint="ws://localhost:1234"
+              onUsersChange={setCollaborativeUsers}
+              onConnectionStatusChange={setConnectionStatus}
+              onBindingChange={setYjsBinding}
             />
+          )}
+
+          {/* Collaborative Cursors */}
+          {enableCollaboration && collaborativeUsers.length > 0 && (
+            <CollaborativeCursors users={collaborativeUsers} binding={yjsBinding} />
           )}
         </div>
 
@@ -126,6 +139,15 @@ export default function LexicalEditorComponent({
           readTime={0}
         />
       </LexicalComposer>
+
+      {/* User Presence Indicator */}
+      {enableCollaboration && (
+        <UserPresence 
+          users={collaborativeUsers}
+          connectionStatus={connectionStatus}
+          isConnected={connectionStatus === 'connected'}
+        />
+      )}
     </div>
   );
 }
