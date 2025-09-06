@@ -9,6 +9,7 @@ import { createPage, getUserPages, deletePage } from "@/lib/firestore.pages";
 import { Plus, FileText, LogOut, User, Calendar, Clock, Trash2 } from "lucide-react";
 import FloatingActionButton from "../components/FloatingActionButton";
 import LoadingSpinner from "../components/LoadingSpinner";
+import CreatePageButton from "../components/CreatePageButton";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -110,11 +111,12 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Quick Actions */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              Quick Actions
-            </h2>
-          </div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                Quick Actions
+              </h2>
+              <CreatePageButton />
+            </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <button
