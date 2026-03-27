@@ -53,7 +53,7 @@ export default function ShareButton({ pageId, title = "Untitled" }: Props) {
       <button
         onClick={() => setIsOpen(true)}
         className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 shadow-sm"
-        title="Share this page for collaboration"
+        title="Share for Collaboration"
       >
         <Share2 size={16} />
         <span className="hidden sm:inline">Share</span>
@@ -62,7 +62,7 @@ export default function ShareButton({ pageId, title = "Untitled" }: Props) {
       {/* Share Modal */}
       {isOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6 mt-400px">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -157,14 +157,6 @@ export default function ShareButton({ pageId, title = "Untitled" }: Props) {
                 <QrCode size={16} />
                 {showQR ? 'Hide' : 'Show'} QR Code
               </button>
-            </div>
-
-            {/* Instructions */}
-            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <p className="text-xs text-blue-700 dark:text-blue-300">
-                <strong>How it works:</strong> Share this link with others. When they open it, 
-                they'll join the same collaborative editing session and see real-time changes.
-              </p>
             </div>
           </div>
         </div>

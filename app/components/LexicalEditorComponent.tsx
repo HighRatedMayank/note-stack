@@ -78,11 +78,11 @@ export default function LexicalEditorComponent({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden relative">
+    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800 shadow-sm overflow-hidden relative">
       <LexicalComposer initialConfig={editorConfig}>
         
         {/* Enhanced Sticky Toolbar */}
-        <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700 shadow-sm">
           <div className="px-4 py-3">
             <ToolbarPlugin />
           </div>
