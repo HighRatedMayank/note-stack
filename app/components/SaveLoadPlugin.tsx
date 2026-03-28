@@ -1,17 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { $createParagraphNode, $createTextNode } from "lexical";
-import {
-  $getRoot,
-  EditorState,
-} from "lexical";
+import { $createParagraphNode, $createTextNode, $getRoot, EditorState } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useParams } from "next/navigation";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
 import { debounce } from "lodash";
 import { useAuth } from "../context/AuthContext";
+import { createClient } from "@/lib/supabase/client";
 
 export default function SaveLoadPlugin({ 
   title, 
@@ -39,21 +34,21 @@ export default function SaveLoadPlugin({
     });
 
     // Only save title if it's provided and different from "Untitled"
-    const saveData: any = { 
+    const saveData: Record<string, string | Date> = { 
       content: htmlString,
-      authorId: user.uid,
-      updatedAt: new Date()
+      author_id: user.id,
+      updated_at: new Date()
     };
     
     if (title && title !== "Untitled") {
       saveData.title = title;
     }
 
-    await setDoc(
-      doc(db, "pages", pageId as string),
-      saveData,
-      { merge: true }
-    );
+    const supabase = createClient();
+    await supabase
+      .from("pages")
+      .update(saveData)
+      .eq("id", pageId as string);
 
     setStatus("saved");
     setTimeout(() => setStatus("idle"), 1500);
@@ -71,11 +66,14 @@ export default function SaveLoadPlugin({
     const loadContent = async () => {
       if (!user || !pageId || hasLoadedRef.current) return; // Don't reload if already loaded
       
-      const docRef = doc(db, "pages", pageId as string);
-      const snapshot = await getDoc(docRef);
-      const data = snapshot.data();
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("pages")
+        .select("content, title")
+        .eq("id", pageId as string)
+        .single();
 
-      if (data) {
+      if (!error && data) {
         // Load content if it exists
         if (data.content) {
           editor.update(() => {
@@ -110,4 +108,3 @@ export default function SaveLoadPlugin({
     </div>
   )
 }
-

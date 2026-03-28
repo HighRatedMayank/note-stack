@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getPageContent, updatePageContent } from "@/lib/firestore.pages";
+import { getPageContent, updatePageContent } from "@/lib/supabase.pages";
 import { useAuth } from "@/app/context/AuthContext";
 import LexicalEditorComponent from "@/app/components/LexicalEditorComponent";
 import FloatingActionButton from "@/app/components/FloatingActionButton";
@@ -133,8 +133,8 @@ export default function EditorPage() {
             initialContent={content}
             onChange={handleContentChange}
             docId={pageId as string}
-            username={user?.displayName || user?.email || "Anonymous"}
-            enableCollaboration={true}
+            username={user?.user_metadata?.name || user?.email || "Anonymous"}
+            enableCollaboration={false}
             title={title}
             onContentLoad={handleContentLoad}
           />

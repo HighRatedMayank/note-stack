@@ -19,6 +19,7 @@ import YjsPlugin from "./YjsPlugin";
 import SaveLoadPlugin from "./SaveLoadPlugin";
 import UserPresence from "./UserPresence";
 import CollaborativeCursors from "./CollaborativeCursors";
+import { WebsocketProvider } from "y-websocket";
 import "./editor.css";
 
 export default function LexicalEditorComponent({
@@ -40,7 +41,7 @@ export default function LexicalEditorComponent({
 }) {
   const [collaborativeUsers, setCollaborativeUsers] = useState<Array<{ name: string; color: string; clientId: number }>>([]);
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
-  const [yjsBinding, setYjsBinding] = useState<any>(null);
+  const [yjsBinding, setYjsBinding] = useState<WebsocketProvider | null>(null);
   const editorConfig: InitialConfigType = {
     namespace: "MyEditor",
     theme: {

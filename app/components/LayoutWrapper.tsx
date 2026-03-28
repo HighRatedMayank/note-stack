@@ -10,8 +10,9 @@ interface LayoutWrapperProps {
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
   const isLandingPage = pathname === "/";
+  const isLoginPage = pathname === "/login";
   
-  if (isLandingPage) {
+  if (isLandingPage || isLoginPage) {
     return <>{children}</>;
   }
   

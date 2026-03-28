@@ -2,7 +2,6 @@
 
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
@@ -12,7 +11,7 @@ type Props = {
   wsEndpoint?: string;
   onUsersChange?: (users: Array<{ name: string; color: string; clientId: number }>) => void;
   onConnectionStatusChange?: (status: string) => void;
-  onBindingChange?: (binding: any) => void;
+  onBindingChange?: (binding: WebsocketProvider | null) => void;
 };
 
 export default function YjsPlugin({
@@ -24,11 +23,10 @@ export default function YjsPlugin({
   onConnectionStatusChange,
   onBindingChange,
 }: Props) {
-  const [editor] = useLexicalComposerContext();
   const providerRef = useRef<WebsocketProvider | null>(null);
   const docRef = useRef<Y.Doc | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [users, setUsers] = useState<Array<{ name: string; color: string; clientId: number }>>([]);
+  const [_isConnected, setIsConnected] = useState(false);
+  const [_users, setUsers] = useState<Array<{ name: string; color: string; clientId: number }>>([]);
 
   useEffect(() => {
     // Create a new Yjs document

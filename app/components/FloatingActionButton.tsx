@@ -3,8 +3,7 @@
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
-import { doc, setDoc, collection } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { createPage } from "@/lib/supabase.pages";
 import { useState } from "react";
 
 export default function FloatingActionButton() {
@@ -17,15 +16,8 @@ export default function FloatingActionButton() {
     
     setIsCreating(true);
     try {
-      const newPageRef = doc(collection(db, "users", user.uid, "documents"));
-      await setDoc(newPageRef, {
-        title: "Untitled",
-        parentId: null,
-        content: "",
-        createdAt: new Date().toISOString(),
-      });
-      
-      router.push(`/editor/${newPageRef.id}`);
+      const pageId = await createPage(user.id);
+      router.push(`/editor/${pageId}`);
     } catch (error) {
       console.error("Failed to create document:", error);
     } finally {

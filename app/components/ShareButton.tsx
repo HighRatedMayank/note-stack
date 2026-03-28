@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Share2, Copy, Check, Users, Link, QrCode } from "lucide-react";
 import toast from "react-hot-toast";
 import QRCodeShare from "./QRCodeShare";
@@ -14,8 +14,12 @@ export default function ShareButton({ pageId, title = "Untitled" }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
 
-  const shareUrl = `${window.location.origin}/editor/${pageId}`;
+  useEffect(() => {
+    setShareUrl(`${window.location.origin}/editor/${pageId}`);
+  }, [pageId]);
+
   const shareText = `Join me in editing "${title}" on Note Stack!`;
 
   const copyToClipboard = async () => {

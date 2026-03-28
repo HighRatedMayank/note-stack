@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getPageContent, updatePageContent } from "@/lib/firestore.pages";
+import { getPageContent, updatePageContent } from "@/lib/supabase.pages";
 import { useAuth } from "@/app/context/AuthContext";
 import LexicalEditorComponent from "@/app/components/LexicalEditorComponent";
 import { CheckCircle, Loader2 } from "lucide-react";

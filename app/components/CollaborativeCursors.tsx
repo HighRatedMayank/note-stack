@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { $getSelection, $isRangeSelection, $getNodeByKey } from "lexical";
-import { syncCursorPositions } from "@lexical/yjs";
+import { $getSelection, $isRangeSelection } from "lexical";
+import { WebsocketProvider } from "y-websocket";
 
 type User = {
   name: string;
@@ -20,7 +20,7 @@ type CursorPosition = {
 
 type Props = {
   users: User[];
-  binding?: any; // Yjs binding reference
+  binding?: WebsocketProvider | null; // Yjs binding reference
 };
 
 export default function CollaborativeCursors({ users, binding }: Props) {
@@ -67,7 +67,7 @@ export default function CollaborativeCursors({ users, binding }: Props) {
     updateCursors(); // Initial update
 
     // Listen for editor selection changes
-    const removeUpdateListener = editor.registerUpdateListener(({ editorState, tags }) => {
+    const removeUpdateListener = editor.registerUpdateListener(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
         // Update awareness with current selection

@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { Menu, X, Home, FileText, LogOut } from "lucide-react";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { createClient } from "@/lib/supabase/client";
 
 export default function MobileNavigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,7 +14,8 @@ export default function MobileNavigation() {
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      const supabase = createClient();
+      await supabase.auth.signOut();
       router.push("/login");
     } catch (error) {
       console.error("Error signing out:", error);

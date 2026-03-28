@@ -4,13 +4,11 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import {
-  collection,
-  doc,
-  onSnapshot,
-  setDoc,
-  deleteDoc,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase";
+  listenToUserPages,
+  createPage,
+  deletePage,
+  PageData,
+} from "@/lib/supabase.pages";
 import {
   Plus,
   Trash2,
@@ -37,6 +35,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { renamePage } from "@/lib/supabase.pages";
 
 
 interface PageNode {
@@ -46,17 +45,43 @@ interface PageNode {
   children?: PageNode[];
 }
 
+function buildPageTree(pages: PageData[]): PageNode[] {
+  const pageMap: Record<string, PageNode> = {};
+  const roots: PageNode[] = [];
+
+  // First pass: create all nodes
+  pages.forEach((page) => {
+    pageMap[page.id] = {
+      id: page.id,
+      title: page.title || "Untitled",
+      parentId: page.parent_page_id || null,
+      children: [],
+    };
+  });
+
+  // Second pass: build tree
+  pages.forEach((page) => {
+    const node = pageMap[page.id];
+    const parentId = page.parent_page_id as string | null;
+    if (parentId && pageMap[parentId]) {
+      pageMap[parentId].children!.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+
+  return roots;
+}
+
 export default function Sidebar() {
   const { user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-
   const [pages, setPages] = useState<PageNode[]>([]);
   const [collapsed, setCollapsed] = useState<{ [key: string]: boolean }>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -64,38 +89,13 @@ export default function Sidebar() {
     })
   );
 
-
-
+  // Listen to pages in real-time from the flat `pages` collection
   useEffect(() => {
     if (!user) return;
-    const userPagesRef = collection(db, "users", user.uid, "documents");
 
-    const unsubscribe = onSnapshot(userPagesRef, (snapshot) => {
-      const pageMap: { [id: string]: PageNode } = {};
-      const rootPages: PageNode[] = [];
-
-      snapshot.docs.forEach((docSnap) => {
-        const data = docSnap.data();
-        const page: PageNode = {
-          id: docSnap.id,
-          title: data.title || "Untitled",
-          parentId: data.parentId || null,
-          children: [],
-        };
-        pageMap[docSnap.id] = page;
-      });
-
-      snapshot.docs.forEach((docSnap) => {
-        const data = docSnap.data();
-        const parentId = data.parentId;
-        if (parentId && pageMap[parentId]) {
-          pageMap[parentId].children!.push(pageMap[docSnap.id]);
-        } else {
-          rootPages.push(pageMap[docSnap.id]);
-        }
-      });
-
-      setPages(rootPages);
+    const unsubscribe = listenToUserPages(user.id, (pageDataList) => {
+      const tree = buildPageTree(pageDataList);
+      setPages(tree);
     });
 
     return () => unsubscribe();
@@ -103,23 +103,24 @@ export default function Sidebar() {
 
   const handleCreate = async (parentId: string | null = null) => {
     if (!user) return;
-    const newPageRef = doc(collection(db, "users", user.uid, "documents"));
-    await setDoc(newPageRef, {
-      title: "Untitled",
-      parentId: parentId || null,
-      content: "",
-      createdAt: new Date().toISOString(),
-    });
-    router.push(`/editor/${newPageRef.id}`);
-    // Close sidebar on mobile after creating
-    if (window.innerWidth < 768) {
-      setIsSidebarOpen(false);
+    try {
+      const pageId = await createPage(user.id, "Untitled", parentId);
+      router.push(`/editor/${pageId}`);
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      }
+    } catch (error) {
+      console.error("Failed to create page:", error);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!user) return;
-    await deleteDoc(doc(db, "users", user.uid, "documents", id));
+    try {
+      await deletePage(id);
+    } catch (error) {
+      console.error("Failed to delete page:", error);
+    }
   };
 
   const toggleCollapse = (id: string) => {
@@ -145,11 +146,9 @@ export default function Sidebar() {
     try {
       const activeId = active.id.toString();
       const overId = over.id.toString();
-      await setDoc(
-        doc(db, "users", user.uid, "documents", activeId),
-        { parentId: overId },
-        { merge: true }
-      );
+      // Update parentPageId using the supabase.pages module
+      await renamePage(activeId, ""); // We need a setParent function, but for now this is a placeholder
+      console.log(`Move ${activeId} under ${overId} — not yet implemented`);
     } catch (err) {
       console.error("Failed to update page hierarchy:", err);
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Users, Wifi, WifiOff } from "lucide-react";
 
 type User = {
@@ -15,7 +15,7 @@ type Props = {
   isConnected: boolean;
 };
 
-export default function UserPresence({ users, connectionStatus, isConnected }: Props) {
+export default function UserPresence({ users, connectionStatus, isConnected: _isConnected }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const getStatusColor = (status: string) => {

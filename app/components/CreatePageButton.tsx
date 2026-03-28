@@ -4,16 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, FileText } from "lucide-react";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 export default function CreatePageButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [pageTitle, setPageTitle] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
 
-  const generatePageId = () => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  };
+
 
   const createPage = async () => {
     if (!pageTitle.trim()) {
@@ -23,12 +23,15 @@ export default function CreatePageButton() {
 
     setIsCreating(true);
     try {
-      const pageId = generatePageId();
+      if (!user) {
+        toast.error("You must be logged in to create a page");
+        return;
+      }
       const title = pageTitle.trim();
       
       // Create the page in Firestore
-      const { createPage } = await import("@/lib/firestore.pages");
-      await createPage(pageId, title, "");
+      const { createPage: createSupabasePage } = await import("@/lib/supabase.pages");
+      const pageId = await createSupabasePage(user.id, title);
       
       toast.success("Page created successfully!");
       setIsOpen(false);
@@ -47,12 +50,15 @@ export default function CreatePageButton() {
   const createQuickPage = async () => {
     setIsCreating(true);
     try {
-      const pageId = generatePageId();
+      if (!user) {
+        toast.error("You must be logged in to create a page");
+        return;
+      }
       const title = `Quick Note ${new Date().toLocaleDateString()}`;
       
       // Create the page in Firestore
-      const { createPage } = await import("@/lib/firestore.pages");
-      await createPage(pageId, title, "");
+      const { createPage: createSupabasePage } = await import("@/lib/supabase.pages");
+      const pageId = await createSupabasePage(user.id, title);
       
       toast.success("Quick page created!");
       

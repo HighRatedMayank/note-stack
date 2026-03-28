@@ -3,9 +3,8 @@
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
-import { signOut } from "firebase/auth";
-import { auth } from "../../lib/firebase";
-import { createPage, getUserPages, deletePage } from "@/lib/firestore.pages";
+import { createClient } from "@/lib/supabase/client";
+import { createPage, getUserPages, deletePage, PageData } from "@/lib/supabase.pages";
 import { Plus, FileText, LogOut, User, Calendar, Clock, Trash2 } from "lucide-react";
 import FloatingActionButton from "../components/FloatingActionButton";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -14,7 +13,7 @@ import CreatePageButton from "../components/CreatePageButton";
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [pages, setPages] = useState<{ id: string; title?: string; createdAt?: string }[]>([]);
+  const [pages, setPages] = useState<PageData[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -23,7 +22,7 @@ export default function DashboardPage() {
   }, [loading, user, router]);
 
   const loadPages = useCallback(async () => {
-    const userPages = await getUserPages(user!.uid);
+    const userPages = await getUserPages(user!.id);
     setPages(userPages);
   }, [user]);
 
@@ -36,7 +35,7 @@ export default function DashboardPage() {
       console.log("No user is authenticated");
       return;
     }
-    const pageId = await createPage(user.uid);
+    const pageId = await createPage(user.id);
     router.push(`/editor/${pageId}`);
   };
 
@@ -52,20 +51,23 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSignOut = () => {
-    signOut(auth)
-      .then(() => {
-        router.push("/login");
-      })
-      .catch((error) => {
-        console.error("Sign out error:", error);
-      });
+  const handleSignOut = async () => {
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/login");
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "Recently";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+  const formatDate = (dateValue?: unknown) => {
+    if (!dateValue) return "Recently";
+    // Handle Firestore Timestamp objects
+    const dateObj = typeof dateValue === 'object' && dateValue !== null && 'toDate' in dateValue
+      ? (dateValue as { toDate: () => Date }).toDate()
+      : new Date(String(dateValue));
+    return dateObj.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -164,7 +166,7 @@ export default function DashboardPage() {
                     Last Updated
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {pages.length > 0 ? formatDate(pages[0]?.createdAt) : "Never"}
+                    {pages.length > 0 ? formatDate(pages[0]?.created_at) : "Never"}
                   </p>
                 </div>
               </div>
@@ -224,7 +226,7 @@ export default function DashboardPage() {
                       </h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
                         <Calendar size={14} />
-                        {formatDate(page.createdAt)}
+                        {formatDate(page.created_at)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
