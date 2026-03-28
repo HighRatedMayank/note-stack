@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, FileText, Eye, Calendar } from "lucide-react";
+import { Clock, FileText, Eye, Calendar, Wifi, WifiOff, Users } from "lucide-react";
 
 interface StatusBarProps {
   wordCount?: number;
   characterCount?: number;
   lastModified?: string;
   readTime?: number;
+  connectionStatus?: string;
+  isOffline?: boolean;
+  onlineUsers?: Array<{ name: string; color: string; clientId: number }>;
   className?: string;
 }
 
@@ -16,33 +19,25 @@ export default function StatusBar({
   characterCount = 0,
   lastModified,
   readTime = 0,
+  connectionStatus = "disconnected",
+  isOffline = false,
+  onlineUsers = [],
   className = "",
 }: StatusBarProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  };
+  const formatTime = (date: Date) =>
+    date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+      month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
     });
   };
 
@@ -53,9 +48,7 @@ export default function StatusBar({
   };
 
   return (
-    <div
-      className={`bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 text-xs text-gray-600 dark:text-gray-400 ${className}`}
-    >
+    <div className={`bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 text-xs text-gray-600 dark:text-gray-400 ${className}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           {/* Word and character count */}
@@ -89,10 +82,54 @@ export default function StatusBar({
           )}
         </div>
 
-        {/* Current time */}
-        <div className="flex items-center gap-1">
-          <Clock size={14} />
-          <span>{formatTime(currentTime)}</span>
+        <div className="flex items-center gap-4">
+          {/* Online users */}
+          {onlineUsers.length > 0 && (
+            <div className="flex items-center gap-1.5">
+              <Users size={14} />
+              <div className="flex -space-x-1">
+                {onlineUsers.slice(0, 5).map((user) => (
+                  <div
+                    key={user.clientId}
+                    className="w-5 h-5 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-[8px] font-bold text-white"
+                    style={{ backgroundColor: user.color }}
+                    title={user.name}
+                  >
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                ))}
+              </div>
+              {onlineUsers.length > 5 && (
+                <span className="text-gray-500">+{onlineUsers.length - 5}</span>
+              )}
+            </div>
+          )}
+
+          {/* Connection status */}
+          <div className="flex items-center gap-1">
+            {isOffline ? (
+              <>
+                <WifiOff size={14} className="text-red-500" />
+                <span className="text-red-500 font-medium">Offline</span>
+              </>
+            ) : connectionStatus === "connected" ? (
+              <>
+                <Wifi size={14} className="text-green-500" />
+                <span className="text-green-500">Synced</span>
+              </>
+            ) : (
+              <>
+                <Wifi size={14} className="text-yellow-500 animate-pulse" />
+                <span className="text-yellow-500">Connecting...</span>
+              </>
+            )}
+          </div>
+
+          {/* Current time */}
+          <div className="flex items-center gap-1">
+            <Clock size={14} />
+            <span>{formatTime(currentTime)}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -106,22 +143,15 @@ export function CompactStatusBar({
   className = "",
 }: Pick<StatusBarProps, "wordCount" | "characterCount" | "className">) {
   return (
-    <div
-      className={`bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 ${className}`}
-    >
+    <div className={`bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 ${className}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span>{wordCount.toLocaleString()} words</span>
           <span className="text-gray-400">•</span>
           <span>{characterCount.toLocaleString()} chars</span>
         </div>
-        
         <div className="text-gray-400">
-          {new Date().toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          })}
+          {new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}
         </div>
       </div>
     </div>

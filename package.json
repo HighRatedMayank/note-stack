@@ -7,10 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "collab-server": "tsx app/server/collab-server.ts",
+    "collab-server": "echo 'Collaboration is handled via Supabase Realtime'",
     "auto-commit": "node scripts/auto-commit.js",
-    "dev:collab": "concurrently \"npm run collab-server\" \"npm run dev\"",
-    "dev:full": "concurrently \"npm run collab-server\" \"npm run dev\" \"npm run auto-commit\""
+    "dev:collab": "npm run dev",
+    "dev:full": "concurrently \"npm run dev\" \"npm run auto-commit\""
   },
   "dependencies": {
     "@chakra-ui/react": "^3.24.0",
@@ -40,7 +40,7 @@
     "react-hot-toast": "^2.5.2",
     "tailwind-merge": "^3.3.1",
     "ws": "^8.18.3",
-    "y-websocket": "^3.0.0",
+    "y-indexeddb": "^9.0.12",
     "yjs": "^13.6.27"
   },
   "devDependencies": {

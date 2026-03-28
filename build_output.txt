@@ -5,39 +5,16 @@
  ✓ Compiled successfully in 2000ms
    Linting and checking validity of types ...
 
-./app/components/UserPresence.tsx
-18:78  Warning: '_isConnected' is defined but never used.  @typescript-eslint/no-unused-vars
+Failed to compile.
 
-./app/components/YjsPlugin.tsx
-28:10  Warning: '_isConnected' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-29:10  Warning: '_users' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+./app/components/LexicalEditorComponent.tsx
+182:3  Warning: 'providerRef' is defined but never used.  @typescript-eslint/no-unused-vars
+187:41  Error: A `require()` style import is forbidden.  @typescript-eslint/no-require-imports
+
+./app/components/Sidebar.tsx
+216:13  Error: Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
 
 ./lib/supabase/server.ts
 1:35  Warning: 'CookieOptions' is defined but never used.  @typescript-eslint/no-unused-vars
 
 info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
-   Collecting page data ...
-   Generating static pages (0/8) ...
-   Generating static pages (2/8) 
-   Generating static pages (4/8) 
-   Generating static pages (6/8) 
- ✓ Generating static pages (8/8)
-   Finalizing page optimization ...
-   Collecting build traces ...
-
-Route (app)                                 Size  First Load JS
-┌ ○ /                                    16.3 kB         177 kB
-├ ○ /_not-found                            989 B         101 kB
-├ ƒ /auth/callback                         122 B        99.8 kB
-├ ○ /dashboard                           5.01 kB         171 kB
-├ ƒ /editor/[pageId]                      118 kB         284 kB
-└ ○ /login                               1.14 kB         162 kB
-+ First Load JS shared by all            99.7 kB
-  ├ chunks/4bd1b696-cf72ae8a39fa05aa.js  54.1 kB
-  ├ chunks/964-eda38e26c0391a47.js       43.5 kB
-  └ other shared chunks (total)          2.01 kB
-
-
-○  (Static)   prerendered as static content
-ƒ  (Dynamic)  server-rendered on demand
-

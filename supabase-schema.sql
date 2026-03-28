@@ -10,6 +10,7 @@ create table public.pages (
   content text default '',
   author_id uuid not null references auth.users(id) on delete cascade,
   parent_page_id uuid references public.pages(id) on delete cascade,
+  yjs_state text,
   deleted boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null

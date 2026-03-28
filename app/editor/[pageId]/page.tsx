@@ -12,38 +12,35 @@ import ShareButton from "@/app/components/ShareButton";
 import { CheckCircle } from "lucide-react";
 import LoadingSpinner, { ButtonSpinner } from "@/app/components/LoadingSpinner";
 
-
-
 export default function EditorPage() {
   const { pageId } = useParams();
   const { user, loading } = useAuth();
-  const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
-  const [inputTitle, setInputTitle] = useState(""); // Local state for input
+  const [inputTitle, setInputTitle] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
-  // Load initial data when component mounts
+  // Load page metadata on mount
   useEffect(() => {
     const loadInitialData = async () => {
       if (!user || !pageId) return;
       try {
         const data = await getPageContent(pageId as string);
         if (data) {
-          setContent(data.content || "");
           setTitle(data.title || "Untitled");
-          setInputTitle(data.title || "Untitled"); // Set input title too
+          setInputTitle(data.title || "Untitled");
         }
       } catch (error) {
         console.error("Failed to load initial data:", error);
       }
+      setIsReady(true);
     };
-
     loadInitialData();
   }, [user, pageId]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputTitle(e.target.value); // Only update local input state
+    setInputTitle(e.target.value);
   };
 
   const handleTitleSave = async () => {
@@ -52,39 +49,34 @@ export default function EditorPage() {
       setTitle("Untitled");
       return;
     }
-    
-    if (inputTitle === title) return; // No change needed
-    
+    if (inputTitle === title) return;
+
     setTitle(inputTitle);
     setIsSaving(true);
     setIsSaved(false);
-    
+
     try {
-      await updatePageContent(pageId as string, content, inputTitle);
+      await updatePageContent(pageId as string, "", inputTitle);
       setIsSaving(false);
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 1500);
     } catch (error) {
       console.error("Failed to save title:", error);
       setIsSaving(false);
-      // Revert on error
       setInputTitle(title);
     }
   };
 
-  const handleContentChange = (newContent: string) => {
-    setContent(newContent);
-    // Content saving is now handled by SaveLoadPlugin
-  };
-
-  const handleContentLoad = (content: string, title: string) => {
-    setContent(content);
-    setTitle(title);
-    setInputTitle(title); // Also update input title
+  const handleContentChange = () => {
+    // Content saving is handled by YjsAutoSavePlugin inside the editor
   };
 
   if (loading || !user) {
     return <LoadingSpinner size="lg" text="Loading editor..." className="min-h-screen" />;
+  }
+
+  if (!isReady) {
+    return <LoadingSpinner size="lg" text="Loading page..." className="min-h-screen" />;
   }
 
   return (
@@ -92,22 +84,16 @@ export default function EditorPage() {
       {/* Header Section */}
       <div className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-300 dark:border-gray-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="relative">
-            {/* Title Input */}
+          <div className="flex items-center justify-between gap-4">
             <input
               value={inputTitle}
               onChange={handleTitleChange}
               onBlur={handleTitleSave}
               placeholder="Untitled"
-              className="w-full text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 bg-transparent border-none outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all duration-200 focus:ring-0"
+              className="flex-1 min-w-0 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 bg-transparent border-none outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all duration-200 focus:ring-0"
             />
-            
-            {/* Share Button and Autosave Status */}
-            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center gap-3">
-              {/* Share Button */}
+            <div className="flex items-center gap-3 shrink-0">
               <ShareButton pageId={pageId as string} title={title} />
-              
-              {/* Autosave Status */}
               {isSaving && (
                 <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 animate-pulse">
                   <ButtonSpinner size="sm" />
@@ -130,21 +116,14 @@ export default function EditorPage() {
         <Breadcrumbs />
         <div className="animate-fade-in">
           <LexicalEditorComponent
-            initialContent={content}
             onChange={handleContentChange}
             docId={pageId as string}
             username={user?.user_metadata?.name || user?.email || "Anonymous"}
-            enableCollaboration={false}
-            title={title}
-            onContentLoad={handleContentLoad}
           />
         </div>
       </div>
 
-      {/* Floating Action Button for Mobile */}
       <FloatingActionButton />
-      
-      {/* Keyboard Shortcuts for Mobile */}
       <KeyboardShortcuts />
     </div>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import {
   listenToUserPages,
   createPage,
@@ -213,9 +214,9 @@ export default function Sidebar() {
         <div className="w-72 h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-xl flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
-              Your Pages
-            </h2>
+            <Link href="/" className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
+              Note Stack
+            </Link>
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <button
