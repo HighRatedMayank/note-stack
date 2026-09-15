@@ -9,6 +9,7 @@ import { Plus, FileText, LogOut, User, Calendar, Clock, Trash2 } from "lucide-re
 import FloatingActionButton from "../components/FloatingActionButton";
 import LoadingSpinner from "../components/LoadingSpinner";
 import CreatePageButton from "../components/CreatePageButton";
+import RazorpayButton from "../components/RazorpayButton";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -117,7 +118,10 @@ export default function DashboardPage() {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 Quick Actions
               </h2>
-              <CreatePageButton />
+              <div className="flex gap-2">
+                <RazorpayButton amount={12} planName="Pro Plan" />
+                <CreatePageButton />
+              </div>
             </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
